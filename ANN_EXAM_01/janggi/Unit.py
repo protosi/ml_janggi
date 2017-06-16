@@ -11,13 +11,16 @@ from abc import ABCMeta
 class Unit(metaclass=ABCMeta):
         
     # 1: blue (Cho), 2: red (han)
-    iFlag = 0
+    iFlag = 0;
 
     # Unit Name
-    strName = ''
+    strName = '';
     
     # Unit Pos
-    mPos = CPos()
+    mPos = CPos();
+    
+    # Unit Score
+    iScore = 0;
     
     
 
@@ -25,6 +28,12 @@ class Unit(metaclass=ABCMeta):
         '''
         Constructor
         '''  
+    
+    def setScore(self, score):
+        self.iScore = score;
+        
+    def getScore(self):
+        self.iScore;
             
     def getFlag(self):    
         return self.iFlag

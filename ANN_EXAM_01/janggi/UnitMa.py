@@ -12,6 +12,7 @@ class UnitMa(CUnit):
     def __init__(self, flag):
         self.setName("MA");
         self.setFlag(flag);
+        self.setScore(700);
         
     
     def getPossibleMoveList(self, maps):

@@ -6,13 +6,13 @@ Created on 2017. 6. 15.
 
 from Unit import Unit as CUnit
 
-class UnitCha(CUnit):
+class UnitPo(CUnit):
 
 
     def __init__(self, flag):
-        self.setName("CHA");
+        self.setName("PO");
         self.setFlag(flag);
-        self.setScore(1000);
+        self.setScore(850);
         
     
     def getPossibleMoveList(self, maps):
