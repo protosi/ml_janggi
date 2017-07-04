@@ -60,7 +60,7 @@ class Unit(metaclass=ABCMeta):
         if self.iFlag == 2:
             flag = "R_";
         
-        return flag + self.strName;
+        return "%6s" % (flag + self.strName);
     
     def __repr__(self):
         return self.__str__();
