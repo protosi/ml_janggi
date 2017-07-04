@@ -15,7 +15,7 @@ class UnitGung(Unit):
         self.setScore(20000);
         
     
-    def getPossibleMoveList(self, maps):
+    def getPossibleMoveList(self):
         pos = self.getPos();
       
         

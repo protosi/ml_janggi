@@ -15,7 +15,7 @@ class UnitMa(Unit):
         self.setScore(700);
         
     
-    def getPossibleMoveList(self, maps):
+    def getPossibleMoveList(self):
         pos = self.getPos();
       
         

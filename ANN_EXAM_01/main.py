@@ -4,13 +4,16 @@ Created on 2017. 6. 15.
 @author: 3F8VJ32
 '''
 
-import Game;
+from Game import Game;
 
 
-game = Game.Game();
+game = Game();
+map = game.getMap();
+cha = map[0][0];
+rtmap, list = cha.getPossibleMoveList(map)
 
-print (game.getMap());
-
+print(rtmap);
+print(list);
 
 
 if __name__ == '__main__':

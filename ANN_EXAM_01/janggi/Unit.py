@@ -3,21 +3,21 @@ Created on 2017. 6. 15.
 
 @author: 3F8VJ32
 '''
-from Game import Game
+
 from Pos import Pos
 from abc import abstractclassmethod
 from abc import ABCMeta
 
 class Unit(metaclass=ABCMeta):
         
-    # 1: blue (Cho), 2: red (han)
+    # 1: blue (초), 2: red (한)
     iFlag = 0;
 
     # Unit Name
     strName = '';
     
     # Unit Pos
-    mPos = Pos();
+    mPos = Pos(0, 0);
     
     # Unit Score
     iScore = 0;
