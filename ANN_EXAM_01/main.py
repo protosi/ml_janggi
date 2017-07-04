@@ -11,7 +11,7 @@ game = Game();
 
 map = game.getMap();
 print(map);
-cha = map[1][5];
+cha = map[1][4];
 
 print(cha)
 print(cha.getPos())

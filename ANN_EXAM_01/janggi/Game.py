@@ -52,11 +52,11 @@ class Game():
         
             #SA
         self.addObjToMap(5, 1, UnitCha(1, self));
-        #self.addObjToMap(3, 0, UnitSa(1, self));
-        #self.addObjToMap(5, 0, UnitSa(1, self));
+        self.addObjToMap(3, 0, UnitSa(1, self));
+        self.addObjToMap(5, 0, UnitSa(1, self));
         
             #GUNG
-        #self.addObjToMap(4, 1, UnitGung(1, self));
+        self.addObjToMap(4, 1, UnitGung(1, self));
         
             #PO
         self.addObjToMap(2, 2, UnitPo(1, self));
