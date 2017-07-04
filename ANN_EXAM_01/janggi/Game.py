@@ -4,14 +4,14 @@ Created on 2017. 6. 15.
 @author: 3F8VJ32
 '''
 
-from janggi.Unit import Unit
-from janggi.UnitCha import UnitCha
-from janggi.UnitGung import UnitGung
-from janggi.UnitJol import UnitJol
-from janggi.UnitMa import UnitMa
-from janggi.UnitPo import UnitPo
-from janggi.UnitSa import UnitSa
-from janggi.UnitSang import UnitSang
+from Unit import Unit
+from UnitCha import UnitCha
+from UnitGung import UnitGung
+from UnitJol import UnitJol
+from UnitMa import UnitMa
+from UnitPo import UnitPo
+from UnitSa import UnitSa
+from UnitSang import UnitSang
 
 
 class Game():
@@ -30,7 +30,7 @@ class Game():
     9    [ R_CHA,   R_MA, R_SANG,   R_SA,      0,   R_SA, R_SANG,   R_MA,  R_CHA]
     '''
     map = []
-    unitList = [];
+    #unitList = [];
     
     
 
@@ -47,15 +47,16 @@ class Game():
         self.addObjToMap(7, 0, UnitMa(1, self));
         
             #SANG
-        self.addObjToMap(2, 0, UnitSang(1, self));
-        self.addObjToMap(6, 0, UnitSang(1, self));
+        #self.addObjToMap(2, 0, UnitSang(1, self));
+        #self.addObjToMap(6, 0, UnitSang(1, self));
         
             #SA
-        self.addObjToMap(3, 0, UnitSa(1, self));
-        self.addObjToMap(5, 0, UnitSa(1, self));
+        self.addObjToMap(5, 1, UnitCha(1, self));
+        #self.addObjToMap(3, 0, UnitSa(1, self));
+        #self.addObjToMap(5, 0, UnitSa(1, self));
         
             #GUNG
-        self.addObjToMap(4, 1, UnitGung(1, self));
+        #self.addObjToMap(4, 1, UnitGung(1, self));
         
             #PO
         self.addObjToMap(2, 2, UnitPo(1, self));
@@ -107,7 +108,7 @@ class Game():
         self.map = map;
     
     def addObjToMap(self, x, y, obj):
-        self.unitList.append(obj);
+        #self.unitList.append(obj);
         self.setObj(x, y, obj);
     
     def setObj(self, x, y, obj):

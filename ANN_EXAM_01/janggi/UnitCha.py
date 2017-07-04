@@ -11,9 +11,9 @@ class UnitCha(Unit):
 
 
     def __init__(self, flag, Game):
-        super(self.__class__, self).__init__(flag, Game)
-        self.setName("CHA")
-        self.setScore(1000)
+        super(self.__class__, self).__init__(flag, Game);
+        self.setName("CHA");
+        self.setScore(1000);
         
     
     def getPossibleMoveList(self, maps):
@@ -101,4 +101,154 @@ class UnitCha(Unit):
             else:
                 break
             
+        # 상단 대각선 처리
+        if(now_y < 3):
+            # 우로 대각선 이동
+            if(now_x - now_y == 3):
+            #{  
+                if(now_y == 0):
+                    # (now_x+1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 or current_map[now_y+1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y+1))
+                        
+                    # (now_x+2, now_y+2) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 and (current_map[now_y+2][now_x+2] == 0 or current_map[now_y+2][now_x+2].getFlag() != self.getFlag())):
+                        map[now_y+2][now_x+2] = 1
+                        list.append(Pos(now_x+2, now_y+2))
+                        
+                if(now_y == 1):
+                    # (now_x+1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 or current_map[now_y+1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y+1))
+                        
+                    # (now_x-1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 or current_map[now_y-1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y-1))
+                        
+                if(now_y == 2):
+                    # (now_x-1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 or current_map[now_y-1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y-1))
+                        
+                    # (now_x-2, now_y-2) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 and (current_map[now_y-2][now_x-2] == 0 or current_map[now_y-2][now_x-2].getFlag() != self.getFlag())):
+                        map[now_y-2][now_x-2] = 1
+                        list.append(Pos(now_x-2, now_y-2))
+                        
+            if(now_x+now_y == 5):
+                if(now_y == 0):
+                    # (now_x-1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 or current_map[now_y+1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y+1))
+                        
+                    # (now_x-2, now_y+2) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 and (current_map[now_y+2][now_x-2] == 0 or current_map[now_y+2][now_x-2].getFlag() != self.getFlag())):
+                        map[now_y+2][now_x-2] = 1
+                        list.append(Pos(now_x-2, now_y+2))
+                        
+                if(now_y == 1):
+                    # (now_x-1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 or current_map[now_y+1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y+1))
+                        
+                    # (now_x+1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 or current_map[now_y-1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y-1))
+                    
+                
+                if(now_y == 2):
+                    # (now_x+1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 or current_map[now_y-1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y-1))
+                    
+                    # (now_x+2, now_y-2) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 and (current_map[now_y-2][now_x+2] == 0 or current_map[now_y-2][now_x+2].getFlag() != self.getFlag())):
+                        map[now_y-2][now_x+2] = 1
+                        list.append(Pos(now_x+2, now_y-2))
+            #}
+        # 하단 대각선 처리
+        elif(now_y > 6):        
+            if(now_y - now_x == 4):
+                if(now_y == 7):
+                #{
+                    # (now_x+1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 or current_map[now_y+1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y+1))
+                    
+                    # (now_x+2, now_y+2) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 and(current_map[now_y+2][now_x+2] == 0 or current_map[now_y+2][now_x+2].getFlag() != self.getFlag())):
+                        map[now_y+2][now_x+2] = 1
+                        list.append(Pos(now_x+2, now_y+2))   
+                #}
+                if(now_y == 8):
+                #{
+                    # (now_x+1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x+1] == 0 or current_map[now_y+1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y+1))
+                    
+                    # (now_x-1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 or current_map[now_y-1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y-1))
+                #}
+                if(now_y == 9):
+                #{
+                    # (now_x-1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 or current_map[now_y-1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y-1))
+                        
+                    # (now_x-2, now_y-2) 처리
+                    if(current_map[now_y-1][now_x-1] == 0 and (current_map[now_y-2][now_x-2] == 0 or current_map[now_y-2][now_x-2].getFlag() != self.getFlag())):
+                        map[now_y-2][now_x-2] = 1
+                        list.append(Pos(now_x-2, now_y-2))
+                #}
+            if(now_x+now_y == 12):
+                if(now_y == 7):
+                #{  
+                    # (now_x-1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 or current_map[now_y+1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y+1))
+                        
+                    # (now_x-2, now_y+2) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 and (current_map[now_y+2][now_x-2] == 0 or current_map[now_y+2][now_x-2].getFlag() != self.getFlag())):
+                        map[now_y+2][now_x-2] = 1
+                        list.append(Pos(now_x-2, now_y+2)) 
+                #}
+                if(now_y == 8):
+                #{
+                    # (now_x-1, now_y+1) 처리
+                    if(current_map[now_y+1][now_x-1] == 0 or current_map[now_y+1][now_x-1].getFlag() != self.getFlag()):
+                        map[now_y+1][now_x-1] = 1
+                        list.append(Pos(now_x-1, now_y+1))
+                    # (now_x+1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 or current_map[now_y-1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y-1))
+                #}
+                if(now_y == 9):
+                #{
+                    # (now_x+1, now_y-1) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 or current_map[now_y-1][now_x+1].getFlag() != self.getFlag()):
+                        map[now_y-1][now_x+1] = 1
+                        list.append(Pos(now_x+1, now_y-1))
+                    
+                    # (now_x+2, now_y-2) 처리
+                    if(current_map[now_y-1][now_x+1] == 0 and (current_map[now_y-2][now_x+2] == 0 or current_map[now_y-2][now_x+2].getFlag() != self.getFlag())):
+                        map[now_y-2][now_x+2] = 1
+                        list.append(Pos(now_x+2, now_y-2))
+                #}
+            
         return map, list
+    pass

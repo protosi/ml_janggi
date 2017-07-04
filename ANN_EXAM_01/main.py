@@ -5,11 +5,18 @@ Created on 2017. 6. 15.
 '''
 
 from Game import Game;
-
-
 game = Game();
+
+
+
 map = game.getMap();
-cha = map[0][0];
+print(map);
+cha = map[1][5];
+
+print(cha)
+print(cha.getPos())
+#cha.setPos(3, 0)
+
 rtmap, list = cha.getPossibleMoveList(map)
 
 print(rtmap);

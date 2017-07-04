@@ -17,7 +17,7 @@ class Unit(metaclass=ABCMeta):
     strName = '';
     
     # Unit Pos
-    mPos = Pos(0, 0);
+    mPos = None;
     
     # Unit Score
     iScore = 0;
@@ -27,6 +27,7 @@ class Unit(metaclass=ABCMeta):
     
 
     def __init__(self, flag, Game):
+        self.mPos = Pos(0, 0)
         self.iFlag = flag
         # 개별 유닛들이 게임 스테이지를 참조할 수 있게 한다
         self.game = Game;
