@@ -3,8 +3,8 @@ Created on 2017. 6. 15.
 
 @author: 3F8VJ32
 '''
-
-from Pos import Pos as CPos;
+from Game import Game
+from Pos import Pos
 from abc import abstractclassmethod
 from abc import ABCMeta
 
@@ -17,17 +17,19 @@ class Unit(metaclass=ABCMeta):
     strName = '';
     
     # Unit Pos
-    mPos = CPos();
+    mPos = Pos();
     
     # Unit Score
     iScore = 0;
     
+    # Game Stage
+    game = None
     
 
-    def __init__(self):
-        '''
-        Constructor
-        '''  
+    def __init__(self, flag, Game):
+        self.iFlag = flag
+        # 개별 유닛들이 게임 스테이지를 참조할 수 있게 한다
+        self.game = Game;
     
     def setScore(self, score):
         self.iScore = score;

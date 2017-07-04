@@ -4,7 +4,7 @@ Created on 2017. 6. 15.
 @author: 3F8VJ32
 '''
 
-from Unit import Unit
+from janggi.Unit import Unit
 from janggi.UnitCha import UnitCha
 from janggi.UnitGung import UnitGung
 from janggi.UnitJol import UnitJol
