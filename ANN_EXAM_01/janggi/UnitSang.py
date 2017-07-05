@@ -85,5 +85,4 @@ class UnitSang(Unit):
                     map[now_y-2][now_x+3] = 1
                     list.append(Pos(now_x+3, now_y-2))    
                 
-                    
-        
+        return map, list
