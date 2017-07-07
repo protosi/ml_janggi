@@ -15,6 +15,11 @@ from UnitSang import UnitSang
 
 
 class Game():
+    
+    # 1 = 초, 2 = 한
+    turn = 1
+    
+    
     '''
     좌표계 - 예시
     Y   X      0       1       2       3       4       5       6       7       8
@@ -100,7 +105,10 @@ class Game():
         self.addObjToMap(4, 6, UnitJol(2, self));
         self.addObjToMap(6, 6, UnitJol(2, self));
         self.addObjToMap(8, 6, UnitJol(2, self));
-        
+    
+    def getTurn(self):
+        return self.turn
+    
     def getMap(self):
         return self.map;
     
