@@ -16,7 +16,7 @@ class UnitJol(Unit):
         self.setScore(400);
         
     
-    def getPossibleMoveList(self, map):
+    def getPossibleMoveList(self):
         pos = self.getPos();
       
         # 연산을 위해 위치 정보를 획득한다.

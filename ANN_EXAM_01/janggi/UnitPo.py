@@ -16,7 +16,7 @@ class UnitPo(Unit):
         self.setScore(850);
         
     
-    def getPossibleMoveList(self, map):
+    def getPossibleMoveList(self):
         # 연산을 위해 위치 정보를 획득한다.
         pos = self.getPos()
         now_x = pos.getXPos()

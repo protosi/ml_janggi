@@ -36,7 +36,7 @@ class Unit(metaclass=ABCMeta):
         self.iScore = score;
         
     def getScore(self):
-        self.iScore;
+        return self.iScore;
             
     def getFlag(self):    
         return self.iFlag

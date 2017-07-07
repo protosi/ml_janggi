@@ -8,20 +8,14 @@ from Game import Game;
 game = Game();
 
 
+game.printMap()
 
-map = game.getMap();
-print(map);
-cha = map[1][4];
-
-print(cha)
-print(cha.getPos())
-#cha.setPos(3, 0)
-
-rtmap, list = cha.getPossibleMoveList(map)
-
-print(rtmap);
-print(list);
-
+game.setMove(0, 3, 1, 3);
+game.printMap()
+game.setMove(0, 6, 1, 6);
+game.printMap()
+game.setMove(0, 0, 0, 9);
+game.printMap()
 
 if __name__ == '__main__':
     pass
