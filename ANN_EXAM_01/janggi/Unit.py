@@ -50,6 +50,11 @@ class Unit(metaclass=ABCMeta):
     def getPos(self):
         return self.mPos;
     
+    def getX(self):
+        return self.mPos.getXPos()
+    def getY(self):
+        return self.mPos.getYPos()
+    
     def setName(self, name):
         self.strName = name;
         

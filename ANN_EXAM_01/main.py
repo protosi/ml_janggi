@@ -5,17 +5,17 @@ Created on 2017. 6. 15.
 '''
 
 from Game import Game;
+from time import sleep
+import os
+import copy
+
+
 game = Game();
+while True:
+    game.printMap()
+    game.doMinMax(game.getMap(), game.m_depth, None, game.getTurn(), game.getTurn())
 
 
-game.printMap()
-
-game.setMove(0, 3, 1, 3);
-game.printMap()
-game.setMove(0, 6, 1, 6);
-game.printMap()
-game.setMove(0, 0, 0, 9);
-game.printMap()
 
 if __name__ == '__main__':
     pass
