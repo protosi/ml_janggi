@@ -24,8 +24,10 @@ class Game():
     choScore = 0
     hanScore = 0
     
+    isGame = False
+    
     # minmax알고리즘에서 내다볼 수의 수
-    m_depth = 3
+    m_depth = 2
     
     '''
     좌표계 - 예시
@@ -55,6 +57,7 @@ class Game():
         # 스코어 초기화
         self.choScore = 0
         self.hanScore = 0
+        self.isGame =True
         
         # 1. CHO
             #CHA
@@ -77,7 +80,7 @@ class Game():
         self.addObjToMap(4, 1, UnitGung(1, self));
         
             #PO
-        self.addObjToMap(2, 2, UnitPo(1, self));
+        self.addObjToMap(1, 2, UnitPo(1, self));
         self.addObjToMap(7, 2, UnitPo(1, self));
         
             #JOL
@@ -109,7 +112,7 @@ class Game():
         self.addObjToMap(4, 8, UnitGung(2, self));
         
             #PO
-        self.addObjToMap(2, 7, UnitPo(2, self));
+        self.addObjToMap(1, 7, UnitPo(2, self));
         self.addObjToMap(7, 7, UnitPo(2, self));
         
             #JOL
@@ -127,68 +130,6 @@ class Game():
 
         # myFlag == turnFlag : 내 차례, max 알고리즘
         # myFlag != turnFlag : 사앧 차례, min 알고리즘
-        
-        '''
-        direct_pattern = []
-        
-        # 초기 인공 지능 세팅 - 차 이동
-        if myFlag == 1 :
-            myJolUnit = stage[3][0]
-            opJolUnit = stage[6][0]
-            print(myJolUnit)
-            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
-                print(myJolUnit)
-                print("0,3,1,3")
-                direct_pattern.append([0, 3, 1, 3])
-            
-            # 우 차문 열기
-            myJolUnit = stage[3][8]
-            opJolUnit = stage[6][8]
-            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
-                print("8,3,7,3")
-                direct_pattern.append([8, 3, 7, 3])     
-            
-            if len(direct_pattern) > 0 :
-                i = random.randrange(0, len(direct_pattern))
-                pos = direct_pattern[i]
-                self.setMove(pos[0], pos[1], pos[2], pos[3])
-                return
-        
-        direct_pattern = []    
-        
-        if myFlag == 2 : 
-            myJolUnit = stage[6][0]
-            opJolUnit = stage[3][0]
-            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
-                print("0,6,1,6")
-                direct_pattern.append([0, 6, 1, 6])
-            
-            # 우 차문 열기
-            myJolUnit = stage[3][8]
-            opJolUnit = stage[6][8]
-            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
-                print("8,6,7,6")
-                direct_pattern.append([8, 6, 7, 6])     
-            
-            if len(direct_pattern) > 0 :
-                i = random.randrange(0, len(direct_pattern))
-                pos = direct_pattern[i]
-                self.setMove(pos[0], pos[1], pos[2], pos[3])
-                return    
-        '''
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         
         depth -= 1
@@ -243,7 +184,9 @@ class Game():
                                 elif turnFlag != myFlag:
                                     # min 카운팅을 하기 위해 음수 return 
                                     res_score = (-1) * oppUnit.getScore()
-                                    
+                                
+                                
+                                
                                 res_state = state
                                 
                                 # for문 exception을 위한 값 세팅
@@ -264,7 +207,8 @@ class Game():
                                     if res_score == None or (myFlag != turnFlag and res_score > score) or (myFlag == turnFlag and res_score < score) :
                                         res_score = score;
                                         
-                                        if(cut_score != None and ((myFlag != turnFlag and res_score > score) or myFlag == turnFlag and res_score >= cut_score)) :
+                                        # 내 차례일 때, max
+                                        if(cut_score != None and ((myFlag != turnFlag and res_score <= cut_score) or myFlag == turnFlag and res_score >= cut_score)) :
                                             col = 9
                                             row = 10
                                             break
@@ -361,21 +305,27 @@ class Game():
         return result
         
     def setMove(self, pre_x, pre_y, new_x, new_y):
+        print(str(pre_x) + ", " + str(pre_y))
+        print(str(new_x) + ", " + str(new_y))
         # 잘못된 범위 예외처리
         if(pre_y < 0 or  pre_y >= len(self.map)):
             print("pre_y is wrong value")
+            self.isGame = False
             return False
         
         if(pre_x < 0 or pre_x >= len(self.map[pre_y])):
             print("pre_x is wrong value")
+            self.isGame = False
             return False
         
         if(new_y < 0 or  new_y >= len(self.map)):
             print("new_y is wrong value")
+            self.isGame = False
             return False
         
         if(new_x < 0 or new_x >= len(self.map[new_y])):
             print("new_x is wrong value")
+            self.isGame = False
             return False
         
         
@@ -384,8 +334,7 @@ class Game():
         # obj가 Unit의 instance가 아니면 False를 리턴한다.
         if(isinstance(obj, Unit) == False):
             print("map is not Unit")
-            print(pre_x)
-            print(pre_y)
+
             return False
         
         flag = obj.getFlag()
@@ -393,6 +342,7 @@ class Game():
         # 현재 차례와 움직이려는 말이 다른 경우
         if(self.turn != flag):
             print("wrong flag")
+            self.isGame = False
             return False
         
         map, _ = obj.getPossibleMoveList()
@@ -402,6 +352,8 @@ class Game():
         print ("=============================")
         
         if(map[new_y][new_x] != 1):
+            print("wrong pos")
+            self.isGame = False
             return False
 
         target = self.map[new_y][new_x] 
@@ -416,6 +368,11 @@ class Game():
             elif(flag == 2):
                 self.hanScore += score
         
+            if(isinstance(target, UnitGung)):
+                print("왕 잡힘")
+                self.isGame = False
+                self.printMap();
+        
         obj.setPos(new_x, new_y)
         self.map[new_y][new_x] = obj
         self.map[pre_y][pre_x] = 0
@@ -428,6 +385,8 @@ class Game():
     def printMap(self):
         print ("===== current move map =====")
         print("current Turn: " + str(self.turnCount))
+        print("초 스코어: " + str(self.choScore))
+        print("한 스코어: " + str(self.hanScore))
         for i in range(0, len(self.map)):
             if(i == 0):
                 print("%6s" % "Y\X", end='')

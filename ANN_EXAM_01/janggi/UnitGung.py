@@ -34,6 +34,7 @@ class UnitGung(Unit):
         
         # 왼쪽으로 이동
         if(now_x > 3):
+            # now_x-1, now_y
             if(current_map[now_y][now_x-1] == 0 or current_map[now_y][now_x-1].getFlag() != self.getFlag()):
                 map[now_y][now_x-1] = 1
                 list.append(Pos(now_x-1, now_y))
