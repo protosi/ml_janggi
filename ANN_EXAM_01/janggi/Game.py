@@ -128,6 +128,69 @@ class Game():
         # myFlag == turnFlag : 내 차례, max 알고리즘
         # myFlag != turnFlag : 사앧 차례, min 알고리즘
         
+        '''
+        direct_pattern = []
+        
+        # 초기 인공 지능 세팅 - 차 이동
+        if myFlag == 1 :
+            myJolUnit = stage[3][0]
+            opJolUnit = stage[6][0]
+            print(myJolUnit)
+            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
+                print(myJolUnit)
+                print("0,3,1,3")
+                direct_pattern.append([0, 3, 1, 3])
+            
+            # 우 차문 열기
+            myJolUnit = stage[3][8]
+            opJolUnit = stage[6][8]
+            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
+                print("8,3,7,3")
+                direct_pattern.append([8, 3, 7, 3])     
+            
+            if len(direct_pattern) > 0 :
+                i = random.randrange(0, len(direct_pattern))
+                pos = direct_pattern[i]
+                self.setMove(pos[0], pos[1], pos[2], pos[3])
+                return
+        
+        direct_pattern = []    
+        
+        if myFlag == 2 : 
+            myJolUnit = stage[6][0]
+            opJolUnit = stage[3][0]
+            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
+                print("0,6,1,6")
+                direct_pattern.append([0, 6, 1, 6])
+            
+            # 우 차문 열기
+            myJolUnit = stage[3][8]
+            opJolUnit = stage[6][8]
+            if myJolUnit != 0 and isinstance(myJolUnit, UnitJol) and myJolUnit.getFlag() == myFlag and opJolUnit != 0 and isinstance(opJolUnit, UnitJol) and opJolUnit.getFlag() != myFlag:
+                print("8,6,7,6")
+                direct_pattern.append([8, 6, 7, 6])     
+            
+            if len(direct_pattern) > 0 :
+                i = random.randrange(0, len(direct_pattern))
+                pos = direct_pattern[i]
+                self.setMove(pos[0], pos[1], pos[2], pos[3])
+                return    
+        '''
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         depth -= 1
         
         res_score = None
@@ -137,6 +200,11 @@ class Game():
             oppFlag = 2
         elif turnFlag == 2 :
             oppFlag = 1
+            
+        if myFlag == 1 :
+            enFlag = 2
+        elif myFlag == 2 :
+            enFlag = 1
         
 
         node_count = 0
@@ -189,7 +257,9 @@ class Game():
                                 state = [col, row, poses[i].getXPos(), poses[i].getYPos()] 
                                 
                                 if depth == 0:
-                                    score = self.getStageScore(param_stage, turnFlag) - self.getStageScore(param_stage, oppFlag)
+                                    score = self.getStageScore(param_stage, myFlag) - self.getStageScore(param_stage, enFlag)
+                                    
+                                    
                                 
                                     if res_score == None or (myFlag != turnFlag and res_score > score) or (myFlag == turnFlag and res_score < score) :
                                         res_score = score;
@@ -203,13 +273,22 @@ class Game():
                                 
                                 score = self.doMinMax(param_stage, depth, res_score, myFlag, oppFlag) 
                                 
-                                if res_score == None or (myFlag == turnFlag and score > res_score) or (myFlag != turnFlag and score < res_score) :
+
+                                if res_score == None:
                                     res_score = score
                                     res_state = state
                                     if(cut_score != None and ((myFlag == turnFlag and res_score > cut_score) or (myFlag != turnFlag and score < cut_score))):
                                         col = 9
                                         row = 10
                                         break
+                                elif (myFlag == turnFlag and score > res_score) or (myFlag != turnFlag and score < res_score) :
+                                    res_score = score
+                                    res_state = state
+                                    if(cut_score != None and ((myFlag == turnFlag and res_score > cut_score) or (myFlag != turnFlag and score < cut_score))):
+                                        col = 9
+                                        row = 10
+                                        break
+                                    
         # for 문의 종료                            
         
                                 

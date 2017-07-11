@@ -68,7 +68,7 @@ class UnitMa(Unit):
                 if now_y < 9 and (current_map[now_y+1][now_x-2] == 0 or current_map[now_y+1][now_x-2].getFlag() != self.getFlag()):
                     # 좌하 이동
                     map[now_y+1][now_x-2] = 1
-                    list.append(Pos(now_x-2, now_y-1))
+                    list.append(Pos(now_x-2, now_y+1))
         
         # 우측 이동
         if now_x < 7:

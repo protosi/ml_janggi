@@ -154,7 +154,7 @@ class UnitSa(Unit):
                     
                 if(now_y == 8):
                     # (now_x-1, now_y+1) 처리
-                    if(current_map[now_y+1][now_x-1] == 0 or map[now_y+1][now_x-1].getFlag() != self.getFlag()):
+                    if(current_map[now_y+1][now_x-1] == 0 or current_map[now_y+1][now_x-1].getFlag() != self.getFlag()):
                         map[now_y+1][now_x-1] = 1
                         list.append(Pos(now_x-1, now_y+1))
                     
