@@ -38,13 +38,15 @@ class UnitSang(Unit):
             if current_map[now_y-1][now_x] == 0:
                 # 좌상 이동
                 if now_x > 1 and current_map[now_y-2][now_x-1] == 0 and ( current_map[now_y-3][now_x-2] == 0 or current_map[now_y-3][now_x-2].getFlag() != self.getFlag()):
-                    map[now_y-3][now_x-2] = 1
-                    list.append(Pos(now_x-2, now_y-3))
+                    
+                        map[now_y-3][now_x-2] = 1
+                        list.append(Pos(now_x-2, now_y-3))
         
                 # 우상 이동
                 if now_x < 7 and current_map[now_y-2][now_x+1] == 0 and ( current_map[now_y-3][now_x+2] == 0 or current_map[now_y-3][now_x+2].getFlag() != self.getFlag()):
-                    map[now_y-3][now_x+2] = 1
-                    list.append(Pos(now_x+2, now_y-3))
+                    
+                        map[now_y-3][now_x+2] = 1
+                        list.append(Pos(now_x+2, now_y-3))
         
         # 하단 이동            
         if now_y < 7:

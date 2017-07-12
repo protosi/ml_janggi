@@ -27,7 +27,7 @@ class Game():
     isGame = False
     
     # minmax알고리즘에서 내다볼 수의 수
-    m_depth = 2
+    m_depth = 3
     
     '''
     좌표계 - 예시
@@ -169,6 +169,15 @@ class Game():
                         node_count += len(poses)
                         
                         for i in range(0, len(poses)):
+                            
+                            if poses[i].getYPos() < 0 or poses[i].getYPos() >= len(stage):
+                                print("wrong pos : " + str(poses[i].getXPos()) + ", " + str(poses[i].getYPos()))
+                                continue
+                                
+                            if poses[i].getXPos() < 0 or poses[i].getXPos() >= len(stage[poses[i].getYPos()]):
+                                print("wrong pos : " + str(poses[i].getXPos()) + ", " + str(poses[i].getYPos()))
+                                continue
+                            
                             state = [col, row, poses[i].getXPos(), poses[i].getYPos()]
                             # 상대 유닛
                             oppUnit = stage[poses[i].getYPos()][poses[i].getXPos()]
