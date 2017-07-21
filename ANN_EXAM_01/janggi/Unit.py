@@ -22,9 +22,16 @@ class Unit(metaclass=ABCMeta):
     # Unit Score
     iScore = 0;
     
+    iId = 0
+    
     # Game Stage
     game = None
     
+    def setId(self, id):
+        self.iId = id
+    
+    def getId(self):
+        return self.iId
 
     def __init__(self, flag, Game):
         self.mPos = Pos(0, 0)

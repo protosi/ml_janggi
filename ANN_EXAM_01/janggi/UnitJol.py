@@ -15,6 +15,11 @@ class UnitJol(Unit):
         self.setName("JOL");
         self.setScore(400);
         
+        if(flag == 1):
+            self.setId(self.getScore())
+        else:
+            self.setId(self.getScore() * (-1))
+        
     
     def getPossibleMoveList(self):
         pos = self.getPos();

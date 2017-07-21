@@ -15,6 +15,11 @@ class UnitMa(Unit):
         self.setName("MA");
         self.setScore(700);
         
+        if(flag == 1):
+            self.setId(self.getScore())
+        else:
+            self.setId(self.getScore() * (-1))
+        
     
     def getPossibleMoveList(self):
         # 연산을 위해 위치 정보를 획득한다.

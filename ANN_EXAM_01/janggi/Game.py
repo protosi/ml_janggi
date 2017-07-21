@@ -13,7 +13,71 @@ from UnitMa import UnitMa
 from UnitPo import UnitPo
 from UnitSa import UnitSa
 from UnitSang import UnitSang
+import math
 import random
+import numpy as np
+
+def convertToOneHot(vector, num_classes=None):
+    """
+    Converts an input 1-D vector of integers into an output
+    2-D array of one-hot vectors, where an i'th input value
+    of j will set a '1' in the i'th row, j'th column of the
+    output array.
+
+    Example:
+        v = np.array((1, 0, 4))
+        one_hot_v = convertToOneHot(v)
+        print one_hot_v
+
+        [[0 1 0 0 0]
+         [1 0 0 0 0]
+         [0 0 0 0 1]]
+    """
+
+    assert isinstance(vector, np.ndarray)
+    assert len(vector) > 0
+
+    if num_classes is None:
+        num_classes = np.max(vector)+1
+    else:
+        assert num_classes > 0
+        assert num_classes >= np.max(vector)
+
+    result = np.zeros(shape=(len(vector), num_classes))
+    result[np.arange(len(vector)), vector] = 1
+    return result.astype(int)
+
+def encode(value, maxvalue):
+    
+    if len(value) != len(maxvalue):
+        return False
+    
+    encode = 0
+    
+    for i in range(0, len(value)):
+        
+        temp = 1
+        for j in range(i+1, len(value)):
+            temp *= maxvalue[j]
+        encode += value[i]* temp
+    
+        
+    return encode
+    
+
+def decode(value, maxvalue):
+
+    rt = []
+    for i in range(0, len(maxvalue)):
+        
+        temp = 1
+        for j in range(i+1, len(maxvalue)):
+            temp *= maxvalue[j]
+        
+        rt.append(math.floor(value / temp))
+        value = value % temp
+    return rt
+
 
 class Game():
     
@@ -27,7 +91,7 @@ class Game():
     isGame = False
     
     # minmax알고리즘에서 내다볼 수의 수
-    m_depth = 3
+    m_depth = 2
     
     '''
     좌표계 - 예시
@@ -49,6 +113,14 @@ class Game():
     
 
     def __init__(self):
+        self.reset()
+    
+    
+    def reset(self):
+    
+        '''
+        게임을 초기화 시킨다.
+        '''
         self.initMap();
         
         # 턴 초기화
@@ -121,9 +193,180 @@ class Game():
         self.addObjToMap(4, 6, UnitJol(2, self));
         self.addObjToMap(6, 6, UnitJol(2, self));
         self.addObjToMap(8, 6, UnitJol(2, self));
+        
+        return self.getStateForML()
     
+    
+    def step(self, action, minmax = False):
+        
+        state = self.getStateForML()
+        
+        action = np.array(action)
+        action = np.argmax(action, axis=-1)
+        action = decode(action, [9, 10, 9, 10])
+        
+        valid, reward, done = self.setMoveForML(action[0], action[1], action[2], action[3])
+        
+        if done == True:
+            return state, reward, done, valid
+        
+        if valid == False:
+            # valid 통과하지 못했을 경우의 로직이 들어간다.
+            pass
+        # valid가 된 경우에
+        else:
+            # 민맥스 상대를 처리할 경우
+            if minmax == True:
+                
+                # 상대방을 민맥스 처리한다.
+                action = self.doMinMaxForML(self.getMap(), self.m_depth, None, self.getTurn(), self.getTurn())
+                # 이동시킨다.
+                valid, reward, done = self.setMoveForML(action[0], action[1], action[2], action[3])
+                # state를 얻는다
+                state = self.getStateForML()
+        
+        return state, reward, done, valid
+    
+    
+    def doMinMaxForML(self, stage, depth, cut_score, myFlag, turnFlag):
+        start_time = time.time()
 
-    
+        # myFlag == turnFlag : 내 차례, max 알고리즘
+        # myFlag != turnFlag : 사앧 차례, min 알고리즘
+        
+        
+        depth -= 1
+        
+        res_score = None
+        res_state = None
+        
+        if turnFlag == 1 :
+            oppFlag = 2
+        elif turnFlag == 2 :
+            oppFlag = 1
+            
+        if myFlag == 1 :
+            enFlag = 2
+        elif myFlag == 2 :
+            enFlag = 1
+        
+
+        node_count = 0
+        for row in range(0, len(stage), 1):
+            if(row >= len(stage)):
+                    break
+            
+            for col in range(0, len(stage[row]), 1):
+                if(row >= len(stage)):
+                    break
+                if(col >= len(stage[row])):
+                    break
+                
+                # 현재 움직일 유닛
+                currUnit = stage[row][col]
+                if isinstance(currUnit, Unit):
+                    
+                    # 현재 움직여야 하는 유닛인 경우에
+                    if currUnit.getFlag() == turnFlag:
+                        _, poses = currUnit.getPossibleMoveList() 
+                        node_count += len(poses)
+                        
+                        for i in range(0, len(poses)):
+                            
+                            if poses[i].getYPos() < 0 or poses[i].getYPos() >= len(stage):
+                                print("wrong pos : " + str(poses[i].getXPos()) + ", " + str(poses[i].getYPos()))
+                                continue
+                                
+                            if poses[i].getXPos() < 0 or poses[i].getXPos() >= len(stage[poses[i].getYPos()]):
+                                print("wrong pos : " + str(poses[i].getXPos()) + ", " + str(poses[i].getYPos()))
+                                continue
+                            
+                            state = [col, row, poses[i].getXPos(), poses[i].getYPos()]
+                            # 상대 유닛
+                            oppUnit = stage[poses[i].getYPos()][poses[i].getXPos()]
+                            
+                            # 왕을 잡을 경우, 더 이상 판단할 필요가 없다.
+                            if oppUnit != 0 and oppUnit.getFlag() != currUnit.getFlag() and isinstance(oppUnit, UnitGung):
+                                
+                                # 내 차례인 경우에
+                                if turnFlag == myFlag:
+                                    # max 카운팅을 하기 위해 양수 return
+                                    res_score = oppUnit.getScore()
+                                # 남의 차례인 경우에
+                                elif turnFlag != myFlag:
+                                    # min 카운팅을 하기 위해 음수 return 
+                                    res_score = (-1) * oppUnit.getScore()
+                                
+                                
+                                
+                                res_state = state
+                                
+                                # for문 exception을 위한 값 세팅
+                                col = 9
+                                row = 10
+                                break
+                            
+                            # 왕을 잡지 못했을 경우
+                            else:
+                                param_stage = self.getChangeStageStatus(stage, col, row, poses[i].getXPos(), poses[i].getYPos())                        
+                                state = [col, row, poses[i].getXPos(), poses[i].getYPos()] 
+                                
+                                if depth == 0:
+                                    score = self.getStageScore(param_stage, myFlag) - self.getStageScore(param_stage, enFlag)
+                                    
+                                    
+                                
+                                    if res_score == None or (myFlag != turnFlag and res_score > score) or (myFlag == turnFlag and res_score < score) :
+                                        res_score = score;
+                                        
+                                        # 내 차례일 때, max
+                                        if(cut_score != None and ((myFlag != turnFlag and res_score <= cut_score) or myFlag == turnFlag and res_score >= cut_score)) :
+                                            col = 9
+                                            row = 10
+                                            break
+                                    continue
+                                
+                                
+                                score = self.doMinMax(param_stage, depth, res_score, myFlag, oppFlag) 
+                                
+
+                                if res_score == None:
+                                    res_score = score
+                                    res_state = state
+                                    if(cut_score != None and ((myFlag == turnFlag and res_score > cut_score) or (myFlag != turnFlag and score < cut_score))):
+                                        col = 9
+                                        row = 10
+                                        break
+                                elif (myFlag == turnFlag and score > res_score) or (myFlag != turnFlag and score < res_score) :
+                                    res_score = score
+                                    res_state = state
+                                    if(cut_score != None and ((myFlag == turnFlag and res_score > cut_score) or (myFlag != turnFlag and score < cut_score))):
+                                        col = 9
+                                        row = 10
+                                        break
+                                    
+        # for 문의 종료                            
+        
+                                
+        # 이게 뭔 시츄레이션이지?
+        
+        
+
+        if depth < self.m_depth -1:
+            return res_score
+
+        
+        # 여기에 이동을 처리한다. (왜?)
+        
+        # your code
+        action = [res_state[0], res_state[1], res_state[2], res_state[3]]
+        
+        
+        action = encode(action, [9, 10, 9, 10])
+        action = convertToOneHot(np.array([action]), 8100)
+        
+        
+        return action[0]
     
     def doMinMax(self, stage, depth, cut_score, myFlag, turnFlag):
         start_time = time.time()
@@ -312,6 +555,89 @@ class Game():
         result[d_y][d_x] = result[f_y][f_x]
         result[f_y][f_x] = 0
         return result
+    
+    def setMoveForML(self, pre_x, pre_y, new_x, new_y):    
+        valid = True
+        done = False
+        # 무의미한 이동을 막기 위해, 기본 이동에서 리워드를 감산한다.
+        reward = - 2
+        
+        NotValidMovePanelty = -500
+        
+        print(str(self.getTurn()) + ": " + str(pre_x) + ", " + str(pre_y) + " -> " + str(new_x) + ", " + str(new_y))
+        
+        # 잘못된 범위 예외처리
+        if(pre_y < 0 or  pre_y >= len(self.map)):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        if(pre_x < 0 or pre_x >= len(self.map[pre_y])):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        if(new_y < 0 or  new_y >= len(self.map)):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        if(new_x < 0 or new_x >= len(self.map[new_y])):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        if new_x == pre_x and new_y == pre_y:
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        obj = self.map[pre_y][pre_x]
+        
+        # obj가 Unit의 instance가 아니면 False를 리턴한다.
+        if(isinstance(obj, Unit) == False):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        flag = obj.getFlag()
+        
+        # 현재 차례와 움직이려는 말이 다른 경우
+        if(self.turn != flag):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+        
+        map, _ = obj.getPossibleMoveList()
+        
+        
+        if(map[new_y][new_x] != 1):
+            valid = False
+            reward = -NotValidMovePanelty
+            return valid, reward, done
+
+        target = self.map[new_y][new_x] 
+        
+        if(isinstance(target, Unit)):
+            score = target.getScore()
+            reward = score;
+            # 초인 경우
+            if(flag == 1):
+                self.choScore += score
+            # 한의 경우
+            elif(flag == 2):
+                self.hanScore += score
+        
+            if(isinstance(target, UnitGung)):
+                done = True;
+        
+        obj.setPos(new_x, new_y)
+        self.map[new_y][new_x] = obj
+        self.map[pre_y][pre_x] = 0
+        
+        # turn을 바꾼다
+        self.changeTurn()
+
+        return valid, reward, done
         
     def setMove(self, pre_x, pre_y, new_x, new_y):
         print(str(pre_x) + ", " + str(pre_y))
@@ -421,6 +747,19 @@ class Game():
                     print("%6s" % i, end='')
                 print("%6s" % map[i][j], end='')
             print('')
+    
+    def getStateForML(self):
+        map = copy.deepcopy(self.map)
+        state = np.array(map).reshape((-1))
+       
+        
+        for i in range(0, len(state)):
+            if state[i] != 0:
+                state[i] = state[i].getId()
+        print(state) 
+        # 여기에 현재 차례, 초의 점수, 한의 점수를 같이 넣는다.
+        state = np.hstack([state, self.getTurn(), self.choScore, self.hanScore])
+        return state
     
     def getMap(self):
         return self.map;

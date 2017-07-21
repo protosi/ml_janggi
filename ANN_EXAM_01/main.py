@@ -25,11 +25,14 @@ import copy
     '''
 game = Game();
 game.printMap()
+ 
+print(len(game.getStateForML()))
+print(game.getStateForML()) 
     
 
-while game.isGame:
-    game.printMap()
-    game.doMinMax(game.getMap(), game.m_depth, None, game.getTurn(), game.getTurn())
+#while game.isGame:
+#    game.printMap()
+#    game.doMinMax(game.getMap(), game.m_depth, None, game.getTurn(), game.getTurn())
 
 
 
