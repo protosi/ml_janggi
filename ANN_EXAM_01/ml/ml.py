@@ -37,10 +37,6 @@ def replay_train(mainDQN: DQN, targetDQN: DQN, train_batch: list) -> float:
     Q_target = rewards + DISCOUNT_RATE * np.max(targetDQN.predict(next_states), axis=1) * ~done
 
     y = mainDQN.predict(states)
-    print("np.arange(len(X))")
-    print(np.arange(len(X)))
-    print("actions")
-    print(actions)
     y[np.arange(len(X)), actions] = Q_target
 
     # Train our network using target and predicted Q values on each episode

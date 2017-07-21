@@ -197,12 +197,11 @@ class Game():
         return self.getStateForML()
     
     
+    # action 은 encode된 숫자이다.
     def step(self, action, minmax = False):
         
         state = self.getStateForML()
         
-        action = np.array(action)
-        action = np.argmax(action, axis=-1)
         action = decode(action, [9, 10, 9, 10])
         
         valid, reward, done = self.setMoveForML(action[0], action[1], action[2], action[3])
@@ -220,6 +219,7 @@ class Game():
                 
                 # 상대방을 민맥스 처리한다.
                 action = self.doMinMaxForML(self.getMap(), self.m_depth, None, self.getTurn(), self.getTurn())
+                action = decode(action, [9, 10, 9, 10])
                 # 이동시킨다.
                 valid, reward, done = self.setMoveForML(action[0], action[1], action[2], action[3])
                 # state를 얻는다
@@ -363,10 +363,9 @@ class Game():
         
         
         action = encode(action, [9, 10, 9, 10])
-        action = convertToOneHot(np.array([action]), 8100)
+           
         
-        
-        return action[0]
+        return action
     
     def doMinMax(self, stage, depth, cut_score, myFlag, turnFlag):
         start_time = time.time()
@@ -636,6 +635,10 @@ class Game():
         
         # turn을 바꾼다
         self.changeTurn()
+        
+        # 1000회를 넘으면 끊어버린다
+        if(self.turn >= 1000):
+            done = True
 
         return valid, reward, done
         
@@ -756,7 +759,7 @@ class Game():
         for i in range(0, len(state)):
             if state[i] != 0:
                 state[i] = state[i].getId()
-        print(state) 
+        #;print(state) 
         # 여기에 현재 차례, 초의 점수, 한의 점수를 같이 넣는다.
         state = np.hstack([state, self.getTurn(), self.choScore, self.hanScore])
         return state

@@ -34,12 +34,15 @@ class DQN:
             l_rate (float, optional): Learning rate
         """
         with tf.variable_scope(self.net_name):
-            self._X = tf.placeholder(tf.float32, [1, self.input_size], name="input_x")
+            self._X = tf.placeholder(tf.float32, [None, self.input_size], name="input_x")
             net = self._X
             net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
             net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
+            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
+            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
+            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
             net = tf.layers.dense(net, self.output_size)
-            #net = tf.contrib.layers.softmax(net)
+            net = tf.contrib.layers.softmax(net)
             
             '''
             W1 = tf.Variable(tf.random_normal([self.input_size, h_size]))
@@ -50,11 +53,11 @@ class DQN:
             B2 = tf.Variable(tf.zeros([h_size]))
             L2  = tf.nn.relu(tf.matmul(L1 , W2) + B2)
             
-            W3 = tf.Variable(tf.random_normal([h_size, 4 * self.output_size]))
-            B3 = tf.Variable(tf.zeros([4 * self.output_size]))
+            W3 = tf.Variable(tf.random_normal([h_size, self.output_size]))
+            B3 = tf.Variable(tf.zeros([self.output_size]))
             L3  = tf.nn.softmax(tf.matmul(L2 , W3) + B3)
             
-            #net = tf.reshape(L3, [-1, 10])
+            net = L3
             '''
             
             
@@ -73,7 +76,7 @@ class DQN:
         Returns:
             np.ndarray: Q value array, shape (n, output_dim)
         """
-        x = np.reshape(state, [1, self.input_size])
+        x = np.reshape(state, [-1, self.input_size])
         
         return self.session.run(self._Qpred, feed_dict={self._X: x})
 

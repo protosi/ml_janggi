@@ -22,9 +22,9 @@ OUTPUT_SIZE = 8100 # [9*10*9*10]
 
 DISCOUNT_RATE = 0.99
 REPLAY_MEMORY = 50000
-BATCH_SIZE = 1
+BATCH_SIZE = 20
 TARGET_UPDATE_FREQUENCY = 5
-MAX_EPISODES = 5000
+MAX_EPISODES = 10000
 
 def main():
     env = Game()
@@ -54,13 +54,14 @@ def main():
                     print("minmax move")
                     action = env.doMinMaxForML(stage, 2, None, env.getTurn(), env.getTurn())
                     
-                   
+                    
                     env.printMap()
                 else:
                     print("ml move")
                     # Choose an action by greedily from the Q-network
                     action = mainDQN.predict(state)
-                    print (action)
+                    action = np.argmax(action)
+                    
                     env.printMap()
 
                 # Get new state and reward from environment
@@ -72,7 +73,7 @@ def main():
                     print("########## wrong move ###########")
                     reward = - 1000
                     # 게임을 끝낸다
-                    done = True
+                    #done = True
 
                 if done:  # Penalty
                     reward = 0
