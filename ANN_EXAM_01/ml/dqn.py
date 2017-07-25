@@ -37,10 +37,6 @@ class DQN:
             self._X = tf.placeholder(tf.float32, [None, self.input_size], name="input_x")
             net = self._X
             net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
-            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
-            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
-            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
-            net = tf.layers.dense(net, h_size, activation=tf.nn.relu)
             net = tf.layers.dense(net, self.output_size)
             net = tf.contrib.layers.softmax(net)
             
@@ -64,8 +60,8 @@ class DQN:
             self._Qpred = net
 
             self._Y = tf.placeholder(tf.float32, shape=[None, self.output_size])
-            self._loss = tf.losses.mean_squared_error(self._Y, self._Qpred)
-
+            #self._loss = tf.losses.mean_squared_error(self._Y, self._Qpred)
+            self._loss = tf.reduce_sum(self._Y * tf.log(tf.clip_by_value(self._Qpred, 1e-10, 1)))
             optimizer = tf.train.AdamOptimizer(learning_rate=l_rate)
             self._train = optimizer.minimize(self._loss)
 

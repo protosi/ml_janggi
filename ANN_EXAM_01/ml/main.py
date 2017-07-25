@@ -16,7 +16,9 @@ from ml import encode
 from ml import decode
 from ml import convertToOneHot
 from time import sleep
+import os
 
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 INPUT_SIZE = 93 # [9*10 + 3]
 OUTPUT_SIZE = 8100 # [9*10*9*10]
 
@@ -36,8 +38,9 @@ def main():
     with tf.Session() as sess:
         mainDQN = DQN(sess, INPUT_SIZE, OUTPUT_SIZE, name="main")
         targetDQN = DQN(sess, INPUT_SIZE, OUTPUT_SIZE, name="target")
+        saver = tf.train.Saver()
         sess.run(tf.global_variables_initializer())
-
+        
         # initial copy q_net -> target_net
         copy_ops = get_copy_var_ops(dest_scope_name="target",
                                     src_scope_name="main")
@@ -84,6 +87,7 @@ def main():
                 if len(replay_buffer) > BATCH_SIZE:
                     minibatch = random.sample(replay_buffer, BATCH_SIZE)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
+                    saver.save(sess, CURRENT_PATH+"/tmp/model.ckpt")
 
                 if step_count % TARGET_UPDATE_FREQUENCY == 0:
                     sess.run(copy_ops)
