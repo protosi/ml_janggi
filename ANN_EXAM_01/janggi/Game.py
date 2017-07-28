@@ -132,6 +132,10 @@ class Game():
         done = self.setMoveForML(pos)
         enTurn = self.getTurn()
         reward = self.getStageScore(self.getMap(), myTurn) - self.getStageScore(self.getMap(), enTurn)
+        
+        if(self.turnCount >= 500):
+            done = True
+        
         return reward, done
     
     def getUnitMap(self, flag):

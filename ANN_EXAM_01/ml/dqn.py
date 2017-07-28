@@ -15,12 +15,12 @@ class DQN:
         
         self._build_network()
         
-    def _build_network(self, h_size=25, l_rate=0.01):
+    def _build_network(self, h_size=25, l_rate=0.0001):
         with tf.variable_scope(self.net_name):
             
             
-            self._XChoMap = tf.placeholder(tf.float32, [None, None], name="input_x_cho_map")
-            self._XHanMap = tf.placeholder(tf.float32, [None, None], name="input_x_han_map")
+            self._XChoMap = tf.placeholder(tf.float32, [None, 10, 9], name="input_x_cho_map")
+            self._XHanMap = tf.placeholder(tf.float32, [None, 10, 9], name="input_x_han_map")
             self._XPos = tf.placeholder(tf.int32, [None, self.input_size], name="input_x_pos")
             
             # ?*10*9*1 형태의 4차원 배열로 reshape한다.
@@ -32,26 +32,26 @@ class DQN:
             choConv2d2 = tf.layers.conv2d(choConv2d1, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             choMaxPool3 = tf.layers.max_pooling2d(choConv2d2, pool_size=[3,3], strides=1, padding="same")
             choMapFlat = tf.reshape(choMaxPool3,[-1, 90])
-            choDense = tf.layers.dense(choMapFlat, 100, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            choDense = tf.layers.dense(choMapFlat, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             # han Convoluation
             hanConv2d1 = tf.layers.conv2d(hanMapReshape, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             hanConv2d2 = tf.layers.conv2d(hanConv2d1, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             hanMaxPool3 = tf.layers.max_pooling2d(hanConv2d2, pool_size=[3,3], strides=1, padding="same")
             hanMapFlat = tf.reshape(hanMaxPool3,[-1, 90])
-            hanDense = tf.layers.dense(hanMapFlat, 100, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            hanDense = tf.layers.dense(hanMapFlat, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             mapSum = tf.add(choDense, hanDense);
             
             # Pos 
             pos = tf.contrib.layers.one_hot_encoding(self._XPos, 10)
             posFlat = tf.reshape(pos, [-1, 40])
-            posDense = tf.layers.dense(posFlat, 100, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            posDense = tf.layers.dense(posFlat, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             posSum = tf.add(mapSum, posDense)
             
-            sumDense1 = tf.layers.dense(posSum, 50, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            sumDense2 = tf.layers.dense(sumDense1, 20, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            sumDense1 = tf.layers.dense(posSum, 50, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            sumDense2 = tf.layers.dense(sumDense1, 20, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(sumDense2, 1, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer(), name="output_y")
 
             self._Qpred = net
