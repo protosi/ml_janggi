@@ -451,4 +451,4 @@ class Game():
             temp = [] 
             for j in range(0, 9):
                 temp.append(0)
-            self.map.append(temp)        
+            self.map.append(temp)

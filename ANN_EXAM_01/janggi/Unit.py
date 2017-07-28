@@ -59,7 +59,7 @@ class Unit(metaclass=ABCMeta):
         self.strName = name;
         
     def getName(self):
-        self.strName;
+        return self.strName;
         
     def __str__(self):
         flag = "";
