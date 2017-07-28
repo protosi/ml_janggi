@@ -16,29 +16,26 @@ INPUT_SIZE = 9
 OUTPUT_SIZE = 3
 MAX_EPISODES = 10000
 
-def replay_train(mainDQN, targetDQN, train_batch):
-    states = np.vstack([x[0] for x in train_batch])
-    actions = np.array([x[1] for x in train_batch])
-    rewards = np.array([x[2] for x in train_batch])
-    next_states = np.vstack([x[3] for x in train_batch])
-    done = np.array([x[4] for x in train_batch])
+def replay_train(mainDQN, train_batch):
+    choMap = np.vstack([x[0] for x in train_batch])
+    hanMap = np.vstack([x[1] for x in train_batch])
+    pos = np.array([x[2] for x in train_batch])
+    rewards = np.array([[x[3]] for x in train_batch])
+    curTurn = np.array([x[4] for x in train_batch])
+    maxTurn = np.array([x[5] for x in train_batch])
+    curFlag = np.array([x[6] for x in train_batch])
+    winFlag = np.array([x[7] for x in train_batch])
     
-    X = states
-    
-    Q_target = rewards + DISCOUNT_RATE * np.max(targetDQN.predict(next_states), axis=1) * ~done
-    y =mainDQN.predict(states)
-    y[np.arange(len(X)), actions] = Q_target
-    return mainDQN.update(X, y)
-
-def get_copy_var_ops( dest_scope_name, src_scope_name):
-    op_holder  = []
-    src_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=src_scope_name)
-    dest_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=dest_scope_name)
-    
-    for src_var, dest_var in zip(src_vars, dest_vars):
-        op_holder.append(dest_var.assign(src_var.value()))
+    for i in range(0, len(curFlag)):
+        # 승자와 같은 편이면~ 포인트를 가산한다.
+        if(curFlag[i] == winFlag[i]):
+            rewards[i][0] += 5000 * (float(curTurn[i] / maxTurn[i]))
+        elif (curFlag[i] != winFlag[i]):
+            rewards[i][0] -= 5000 * (float(curTurn[i] / maxTurn[i]))
         
-    return op_holder
+        Q_target = np.tanh(rewards / 5000.0)
+    return mainDQN.update(choMap, hanMap, pos, Q_target)
+
 
 def main():
     replay_buffer = deque(maxlen=REPLAY_MEMORY)
