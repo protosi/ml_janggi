@@ -21,24 +21,24 @@ class DQN:
             
             self._XChoMap = tf.placeholder(tf.float32, [None, None], name="input_x_cho_map")
             self._XHanMap = tf.placeholder(tf.float32, [None, None], name="input_x_han_map")
-            self._XPos = tf.placeholder(tf.float32, [None, self.input_size], name="input_x_pos")
+            self._XPos = tf.placeholder(tf.int32, [None, self.input_size], name="input_x_pos")
             
             # ?*10*9*1 형태의 4차원 배열로 reshape한다.
             choMapReshape = tf.reshape(self._XChoMap, [-1, 10, 9, 1])
             hanMapReshape = tf.reshape(self._XHanMap, [-1, 10, 9, 1])
             
             # cho Convoluation
-            choConv2d1 = tf.layers.conv2d(choMapReshape, filters=8, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            choConv2d1 = tf.layers.conv2d(choMapReshape, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             choConv2d2 = tf.layers.conv2d(choConv2d1, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             choMaxPool3 = tf.layers.max_pooling2d(choConv2d2, pool_size=[3,3], strides=1, padding="same")
-            choMapFlat = tf.reshape(choMaxPool3[-1, 90])
+            choMapFlat = tf.reshape(choMaxPool3,[-1, 90])
             choDense = tf.layers.dense(choMapFlat, 100, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             # han Convoluation
-            hanConv2d1 = tf.layers.conv2d(hanMapReshape, filters=8, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            hanConv2d1 = tf.layers.conv2d(hanMapReshape, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             hanConv2d2 = tf.layers.conv2d(hanConv2d1, filters=1, kernel_size=[3,3], padding="same", activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             hanMaxPool3 = tf.layers.max_pooling2d(hanConv2d2, pool_size=[3,3], strides=1, padding="same")
-            hanMapFlat = tf.reshape(hanMaxPool3[-1, 90])
+            hanMapFlat = tf.reshape(hanMaxPool3,[-1, 90])
             hanDense = tf.layers.dense(hanMapFlat, 100, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             mapSum = tf.add(choDense, hanDense);
