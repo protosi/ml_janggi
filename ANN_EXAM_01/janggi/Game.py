@@ -14,6 +14,7 @@ from UnitPo import UnitPo
 from UnitSa import UnitSa
 from UnitSang import UnitSang
 import random
+import numpy as np
 
 class Game():
     
@@ -137,6 +138,18 @@ class Game():
             done = True
         
         return reward, done
+    
+    def getPossibleMoveList(self, flag):
+        
+        map = self.getUnitMap(flag)
+        list = np.hstack(map)
+        rt = []
+        for i in range(len(list)):
+            if isinstance(list[i], Unit):
+                mvlist = list[i].getPossibleMoveList()
+                for j in range(len(mvlist)):
+                    rt.append(list[i].getX(), list[i].getY(), mvlist[i].getXPos(), mvlist[i].getYPos())
+        return rt;
     
     def getUnitMap(self, flag):
         map = copy.deepcopy(self.getMap())

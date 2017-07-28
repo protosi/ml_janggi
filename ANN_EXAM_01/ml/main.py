@@ -63,15 +63,21 @@ def main():
         mainDQN = DQN(sess, INPUT_SIZE, OUTPUT_SIZE, name="main")
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
+        #saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
         saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
-
+        MLFlag = 2
         
         for episode in range(MAX_EPISODES):
             
+            if MLFlag == 1:
+                MLFlag = 2
+            elif MLFlag == 2:
+                MLFlag = 1
+            
             temp_replay_buffer.clear()
-            #e = 1. / ((episode/10)+1)
-            e = 1
+            e = 1. / ((episode/10)+1)
+            #e = 1
             done = False
             step_count = 0
             env.initGame()
@@ -91,9 +97,24 @@ def main():
                     predict = mainDQN.predict([choMap], [hanMap], [pos])
                     print("ml thinks that this position value is ", predict)
                 else:
+                    if curFlag == MLFlag:
+                        maxPredict = -1
+                        maxMv = []
+                        poslist = env.getPossibleMoveList(curFlag)
+                        for i in range(len(poslist)):
+                            pos = poslist[i]
+                            predict = mainDQN.predict([choMap], [hanMap], [pos])
+                            if predict > maxPredict:
+                                maxPredict = predict
+                                maxMv = pos
+                        print("ml thinks that position", maxMv, " value is ", maxPredict)
+                    else:
+                        pos = env.getMinMaxPos()
+                        predict = mainDQN.predict([choMap], [hanMap], [pos])
+                        print("ml thinks that this position value is ", predict)
                     #predict = mainDQN.predict(state)
                     #action = np.argmax(predict)
-                    print ("nothing")
+                    pos = maxMv
                    
                 reward, done = env.doGame(pos)
                 
@@ -115,14 +136,17 @@ def main():
             # End of Single Episode
             
             
+            lMax = episode * 1000
+            if lMax > 50000:
+                lMax = 50000
             
-            
-            for i in range(1000):
+            for i in range(lMax):
                 if len(replay_buffer) > BATCH_SIZE:
                     minibatch = random.sample(replay_buffer, BATCH_SIZE)
                     loss, _ = replay_train(mainDQN, minibatch)
                     print(i, loss)
-                    saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt", global_step=episode*1000+i)
+            
+            saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
 
         # End of All Episode 
         
