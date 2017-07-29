@@ -132,7 +132,7 @@ class Game():
         myTurn  = self.getTurn()
         done = self.setMoveForML(pos)
         enTurn = self.getTurn()
-        reward = self.getStageScore(self.getMap(), myTurn) - self.getStageScore(self.getMap(), enTurn)
+        reward = self.getStageScoreForML(self.getMap(), myTurn) - self.getStageScoreForML(self.getMap(), enTurn)
         
         if(self.turnCount >= 500):
             done = True
@@ -141,14 +141,16 @@ class Game():
     
     def getPossibleMoveList(self, flag):
         
-        map = self.getUnitMap(flag)
+        map = copy.deepcopy(self.getMap())
         list = np.hstack(map)
         rt = []
         for i in range(len(list)):
             if isinstance(list[i], Unit):
-                mvlist = list[i].getPossibleMoveList()
-                for j in range(len(mvlist)):
-                    rt.append(list[i].getX(), list[i].getY(), mvlist[i].getXPos(), mvlist[i].getYPos())
+                if(list[i].getFlag() == flag):
+                    _, mvlist = list[i].getPossibleMoveList()
+
+                    for j in range(len(mvlist)):
+                        rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
         return rt;
     
     def getUnitMap(self, flag):
@@ -493,6 +495,19 @@ class Game():
         elapsed_time = time.time() - start_time
         print("elapsed_time : " + str(elapsed_time))
         self.setMove(res_state[0], res_state[1], res_state[2], res_state[3])
+    
+    def getStageScoreForML(self, stage, flag):
+        
+        score = 0 
+        for row in range(0, len(stage)):
+            for col in range(0, len(stage[row])):
+                
+                if stage[row][col] != 0 and stage[row][col].getFlag() == flag :
+                    score += stage[row][col].getScore()
+                    
+        #score += random.randrange(1, 100) - random.randrange(1, 100)
+        return score
+    
     
     def getStageScore(self, stage, flag):
         
