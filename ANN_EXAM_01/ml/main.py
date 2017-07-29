@@ -18,7 +18,7 @@ DISCOUNT_RATE = 1
 
 INPUT_SIZE = 4
 OUTPUT_SIZE = 1
-MAX_EPISODES = 10000
+MAX_EPISODES = 100000
 
 # 게임이 끝나면 temp_replay에 든 레코드를 갈무리한다.
 def end_game_process(mainDQN, temp_replay, maxturn, winFlag):
@@ -54,11 +54,11 @@ def end_game_process(mainDQN, temp_replay, maxturn, winFlag):
         print (curFlagName, curTurn[i], pos[i], rewards[i], tempRewards[i], Q_target[i], predict[0],winFlagName )
 
         rt_deque.append((choMap[i], hanMap[i], pos[i], [curFlag[i]], Q_target[i]))
-    sleep(10)
+
     return rt_deque
     
 # replay에서 미니배치 추출한 것으로 학습을 시킨다.
-def replay_train(mainDQN, train_batch):
+def replay_train(mainDQN, train_batch, l_rate):
     choMap = np.array([x[0] for x in train_batch])
     hanMap = np.array([x[1] for x in train_batch])
     pos = np.array([x[2] for x in train_batch])
@@ -68,7 +68,7 @@ def replay_train(mainDQN, train_batch):
     
     
     
-    return mainDQN.update(choMap, hanMap, pos, flag, Q_target)
+    return mainDQN.update(choMap, hanMap, pos, flag, Q_target, l_rate)
 
 def main():
     replay_buffer = deque(maxlen=REPLAY_MEMORY)
@@ -79,10 +79,10 @@ def main():
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         #saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
-        #saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         MLFlag = 2
-        
+        l_rate = 0.1
         for episode in range(MAX_EPISODES):
             
             if MLFlag == 1:
@@ -92,7 +92,7 @@ def main():
             
             temp_replay_buffer.clear()
             #e = 1. / ((episode/10)+1)
-            e = 0
+            e = episode % 3
             done = False
             step_count = 0
             env.initGame()
@@ -107,7 +107,7 @@ def main():
                 curTurn =env.turnCount
                 curFlag = env.getTurn()
                 
-                if np.random.rand() < e:
+                if e > 0:
                     pos = env.getMinMaxPos()
                     predict = mainDQN.predict([choMap], [hanMap], [pos], [[curFlag]])
                     print("ml thinks that this position value is ", predict)
@@ -158,12 +158,14 @@ def main():
             lMax = (episode +1) * 1000
             if lMax > 50000:
                 lMax = 50000
-            
+            #l_rate = l_rate * 0.95
             for i in range(lMax):
+                
                 if len(replay_buffer) > BATCH_SIZE:
                     minibatch = random.sample(replay_buffer, BATCH_SIZE)
-                    loss, _ = replay_train(mainDQN, minibatch)
-                    
+                    loss, _ = replay_train(mainDQN, minibatch, l_rate)
+                    if i % 1000 == 0:
+                        print(i, loss)
 
             saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
 
