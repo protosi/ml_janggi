@@ -1,2 +1,2 @@
-model_checkpoint_path: "C:\\Users\\3F8VJ32\\git\\ANN_EXAM_01\\ANN_EXAM_01\\ml/cnn/model.ckpt"
-all_model_checkpoint_paths: "C:\\Users\\3F8VJ32\\git\\ANN_EXAM_01\\ANN_EXAM_01\\ml/cnn/model.ckpt"
+model_checkpoint_path: "D:\\LiClipse Workspace\\ANN_EXAM_02\\ml/cnn/model.ckpt"
+all_model_checkpoint_paths: "D:\\LiClipse Workspace\\ANN_EXAM_02\\ml/cnn/model.ckpt"
