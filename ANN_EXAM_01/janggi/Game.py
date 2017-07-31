@@ -134,7 +134,7 @@ class Game():
         enTurn = self.getTurn()
         reward = self.getStageScoreForML(self.getMap(), myTurn) - self.getStageScoreForML(self.getMap(), enTurn)
         
-        if(self.turnCount >= 500):
+        if(self.turnCount >= 1000):
             done = True
         
         return reward, done
@@ -152,6 +152,15 @@ class Game():
                     for j in range(len(mvlist)):
                         rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
         return rt;
+    
+    def getState(self):
+        
+        choMap = self.getUnitMap(1)
+        hanMap = self.getUnitMap(2)
+        choMap =np.array(choMap).reshape(10, 9, 1)
+        hanMap =np.array(hanMap).reshape(10, 9, 1)
+        rt = np.concatenate((choMap, hanMap), 2)
+        return rt
     
     def getUnitMap(self, flag):
         map = copy.deepcopy(self.getMap())
