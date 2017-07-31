@@ -36,7 +36,7 @@ def end_game_process(mainDQN, temp_replay, winFlag):
             reward = 1
         
         print("original :" , states[i].shape, actions[i], reward, next_states[i].shape, done[i], winFlag)
-        rt_deque.append((states[i], np.argmax(actions[i]), winFlag, next_states[i], done[i]))
+        rt_deque.append((states[i], next_states[i], winFlag,  done[i]))
         
         # ################################
         # 오리지널의 좌우대칭을 처리한다.
@@ -57,7 +57,7 @@ def end_game_process(mainDQN, temp_replay, winFlag):
         if winFlag == np.argmax(inv_action[0]):
             reward = 1      
         print("leftright inv :" , inv_states.shape, inv_action[0], reward, inv_new_states.shape, done[i], winFlag)
-        rt_deque.append((inv_states, np.argmax(inv_action[0]), winFlag, inv_new_states, done[i]))
+        rt_deque.append((inv_states, inv_new_states,  winFlag, done[i]))
         
         
         # ################################
@@ -86,7 +86,7 @@ def end_game_process(mainDQN, temp_replay, winFlag):
             reward = 1
             
         print("flag inv :" , inv_states.shape, inv_action[0], reward, inv_new_states.shape, done[i], invWinFlag)
-        rt_deque.append((inv_states, np.argmax(inv_action[0]), invWinFlag, inv_new_states, done[i]))
+        rt_deque.append((inv_states, inv_new_states, invWinFlag,  done[i]))
     
         # ################################
         # 한초대칭의 좌우대칭을 처리한다.
@@ -109,7 +109,7 @@ def end_game_process(mainDQN, temp_replay, winFlag):
             reward = 1
             
         print("flag leftright inv :" , inv_rl_states.shape, inv_action[0], reward, inv_rl_new_states.shape, done[i], invWinFlag)
-        rt_deque.append((inv_rl_states, np.argmax(inv_action[0]), invWinFlag, inv_rl_new_states, done[i]))
+        rt_deque.append((inv_rl_states, inv_rl_new_states, invWinFlag, done[i]))
     
         
 
@@ -119,24 +119,23 @@ def end_game_process(mainDQN, temp_replay, winFlag):
 def replay_train(mainDQN: DQN, targetDQN: DQN, train_batch) :
 
     states = np.vstack([[x[0]] for x in train_batch])
-    actions = np.array([x[1] for x in train_batch])
+    next_states = np.vstack([[x[1]] for x in train_batch])
     winFlags = np.array([x[2] for x in train_batch])
-    
-    next_states = np.vstack([[x[3]] for x in train_batch])
-    done = np.array([x[4] for x in train_batch])
+    done = np.array([x[3] for x in train_batch])
     
 
     X = states
     
-    actions = mainDQN(states)
+    _actions = mainDQN.predict(states)
     
     rewards = []
+    actions = []
     for i in range (len(winFlags)):
-        reward = -1
-        if(np.argmax(actions[i]) == winFlags[i]):
+        reward = -2
+        if(np.argmax(_actions[i]) == winFlags[i]):
             reward = 1
         rewards.append(reward)
-        actions[i] = np.argmax(actions[i])
+        actions.append(np.argmax(_actions[i]))
 
     Q_target = rewards + DISCOUNT_RATE * np.max(targetDQN.predict(next_states), axis=1) * ~done
     
@@ -166,8 +165,8 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
 
 def main():
     replay_buffer = deque(maxlen=REPLAY_MEMORY)
-    #with open(CURRENT_PATH + '/cnn/replay_buffer.pickle', 'rb') as handle:
-    #    replay_buffer = pickle.load(handle)
+    with open(CURRENT_PATH + '/cnn/replay_buffer.pickle', 'rb') as handle:
+        replay_buffer = pickle.load(handle)
     temp_replay_buffer = deque(maxlen=REPLAY_MEMORY)
     env = Game()
     with tf.Session() as sess:
@@ -176,7 +175,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         #saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
-        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        #saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
         sess.run(copy_ops)

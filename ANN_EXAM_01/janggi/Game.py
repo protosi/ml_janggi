@@ -28,7 +28,7 @@ class Game():
     isGame = False
     
     # minmax알고리즘에서 내다볼 수의 수
-    m_depth = 2
+    m_depth = 3
     
     '''
     좌표계 - 예시
