@@ -1,18 +1,21 @@
-import tensorflow as tf
-import numpy as np
-import os 
-import copy
-import pickle
 from collections import deque
-from typing import List
+import copy
+import os 
 import random
-from dqn import DQN
-from Game import Game
 from time import sleep
-# https://omid.al/posts/2017-02-20-Tutorial-Build-Your-First-Tensorflow-Android-App.html
+from typing import List
+import pickle
+from Game import Game
+from JsonParsorClass import JsonParsorClass
+from dqn import DQN
+import numpy as np
+import tensorflow as tf
 
+
+#import pickle
+# https://omid.al/posts/2017-02-20-Tutorial-Build-Your-First-Tensorflow-Android-App.html
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-REPLAY_MEMORY = 1000000
+REPLAY_MEMORY = 2000000
 BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
 DISCOUNT_RATE = 0.99
@@ -123,7 +126,6 @@ def replay_train(mainDQN: DQN, targetDQN: DQN, train_batch) :
     winFlags = np.array([x[2] for x in train_batch])
     done = np.array([x[3] for x in train_batch])
     
-
     X = states
     
     _actions = mainDQN.predict(states)
@@ -163,10 +165,79 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
         op_holder.append(dest_var.assign(src_var.value()))
     return op_holder
 
+def learn_from_db():
+    
+    print ("####################")
+    print ("load learning data")
+    print ("####################")
+    replay_buffer = get_replay_deque_from_db()
+    with open(CURRENT_PATH+'/cnn/replay_buffer.pickle', 'wb') as handle:
+        pickle.dump(replay_buffer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print ("####################")
+    print ("load learning data done!")
+    print ("####################")
+    
+    with tf.Session() as sess:
+        mainDQN = DQN(sess, INPUT_SIZE, OUTPUT_SIZE, name="main")
+        targetDQN = DQN(sess, INPUT_SIZE, OUTPUT_SIZE, name="target")
+        
+        
+        sess.run(tf.global_variables_initializer())
+        saver = tf.train.Saver()
+        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        
+        copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
+        sess.run(copy_ops)
+    
+        print ("####################")
+        print ("learning process start")
+        print ("####################")  
+    
+    
+        for i in range(1000000):
+            if len(replay_buffer) > BATCH_SIZE:
+                minibatch = random.sample(replay_buffer, BATCH_SIZE)
+                loss, _ = replay_train(mainDQN, targetDQN, minibatch)
+
+                if i % 1000 == 0:
+                    print(i, loss)
+                    
+            if i % TARGET_UPDATE_FREQUENCY == 0:
+                sess.run(copy_ops)
+        saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt") 
+        print ("####################")
+        print ("learning process complete")
+        print ("####################")       
+
+def get_replay_deque_from_db():
+    jParsor = JsonParsorClass()
+    gamelist = jParsor.getGameList();
+    
+    rt_deque = deque(maxlen=REPLAY_MEMORY);
+    
+    
+    for x in gamelist:
+
+        panlist = jParsor.getPanList(x['idx']);
+        for i in range(len(panlist)):
+            row = panlist[i]
+            next_state = row['map']
+            state = row['map']
+            winFlag = row['win']
+            done = True
+            
+            if i < len(panlist) -1 :
+                done = False
+                next_state = panlist[i+1]['map']
+            
+            rt_deque.append((state, next_state, winFlag, done))
+        
+    return rt_deque
+
 def main():
     replay_buffer = deque(maxlen=REPLAY_MEMORY)
-    with open(CURRENT_PATH + '/cnn/replay_buffer.pickle', 'rb') as handle:
-        replay_buffer = pickle.load(handle)
+    #with open(CURRENT_PATH + '/cnn/replay_buffer.pickle', 'rb') as handle:
+        #replay_buffer = pickle.load(handle)
     temp_replay_buffer = deque(maxlen=REPLAY_MEMORY)
     env = Game()
     with tf.Session() as sess:
@@ -247,8 +318,8 @@ def main():
             replay_buffer.extend(rt_deque)
 
             print(len(replay_buffer))
-            with open(CURRENT_PATH+'/cnn/replay_buffer.pickle', 'wb') as handle:
-                pickle.dump(replay_buffer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            #with open(CURRENT_PATH+'/cnn/replay_buffer.pickle', 'wb') as handle:
+            #    pickle.dump(replay_buffer, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
             lMax = (episode +1) * 1000
             if lMax > 50000:
@@ -274,5 +345,5 @@ def main():
         
         
         
-        
-main()
+learn_from_db()        
+#main()
