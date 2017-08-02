@@ -28,14 +28,14 @@ class Game():
     isGame = False
     
     # minmax알고리즘에서 내다볼 수의 수
-    m_depth = 3
+    m_depth = 2
     
     '''
     좌표계 - 예시
     Y   X      0       1       2       3       4       5       6       7       8
     0    [ B_CHA,   B_MA, B_SANG,   B_SA,      0,   B_SA, B_SANG,   B_MA,  B_CHA],
     1    [     0,      0,      0,      0, B_GUNG,      0,      0,      0,      0],
-    2    [     0,      0,   B_PO,      0,      0,      0,      0,   B_PO,      0],
+    2    [     0,   B_PO,      0,      0,      0,      0,      0,   B_PO,      0],
     3    [ B_JOL,      0,  B_JOL,      0,  B_JOL,      0,  B_JOL,      0,  B_JOL],
     4    [     0,      0,      0,      0,      0,      0,      0,      0,      0], 
     5    [     0,      0,      0,      0,      0,      0,      0,      0,      0], 

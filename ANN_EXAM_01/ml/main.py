@@ -131,7 +131,7 @@ def replay_train(mainDQN: DQN, targetDQN: DQN, train_batch) :
     rewards = []
     actions = []
     for i in range (len(winFlags)):
-        reward = -2
+        reward = -1
         if(np.argmax(_actions[i]) == winFlags[i]):
             reward = 1
         rewards.append(reward)
@@ -175,7 +175,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         #saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
-        #saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
         sess.run(copy_ops)
