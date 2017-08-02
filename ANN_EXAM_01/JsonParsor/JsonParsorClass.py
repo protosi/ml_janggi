@@ -48,7 +48,7 @@ class JsonParsorClass(object):
             rt.append({"win":win, "turn":turn, "map": state})
         return rt
     def _getConn(self):
-        print(self.host, self.port, self.user, self.passwd, self.db)
+
         return pymysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.passwd, db=self.db, charset=self.charset)
     
     def _selectQuery(self, sql, opt = None):
