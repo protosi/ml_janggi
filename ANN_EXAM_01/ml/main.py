@@ -21,8 +21,8 @@ TARGET_UPDATE_FREQUENCY = 5
 DISCOUNT_RATE = 0.99
 
 INPUT_SIZE = 4
-OUTPUT_SIZE = 3
-MAX_EPISODES = 100000
+OUTPUT_SIZE = 2
+MAX_EPISODES = 100000000
 
 # 게임이 끝나면 temp_replay에 든 레코드를 갈무리한다.
 def end_game_process(mainDQN, temp_replay, winFlag):
@@ -133,8 +133,8 @@ def replay_train(mainDQN: DQN, targetDQN: DQN, train_batch) :
     rewards = []
     actions = []
     for i in range (len(winFlags)):
-        reward = -1
-        if(np.argmax(_actions[i]) == winFlags[i]):
+        reward = -2
+        if(np.argmax(_actions[i]) == (winFlags[i] - 1)):
             reward = 1
         rewards.append(reward)
         actions.append(np.argmax(_actions[i]))
@@ -170,9 +170,11 @@ def learn_from_db():
     print ("####################")
     print ("load learning data")
     print ("####################")
-    replay_buffer = get_replay_deque_from_db()
-    with open(CURRENT_PATH+'/cnn/replay_buffer.pickle', 'wb') as handle:
-        pickle.dump(replay_buffer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    #replay_buffer = get_replay_deque_from_db()
+    #with open(CURRENT_PATH+'/cnn/replay_buffer.pickle', 'wb') as handle:
+    #    pickle.dump(replay_buffer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(CURRENT_PATH + '/cnn/replay_buffer.pickle', 'rb') as handle:
+        replay_buffer = pickle.load(handle)
     print ("####################")
     print ("load learning data done!")
     print ("####################")
@@ -184,27 +186,28 @@ def learn_from_db():
         
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
-        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        #saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
         sess.run(copy_ops)
-    
+        
         print ("####################")
         print ("learning process start")
         print ("####################")  
     
     
-        for i in range(1000000):
+        for i in range(MAX_EPISODES):
             if len(replay_buffer) > BATCH_SIZE:
                 minibatch = random.sample(replay_buffer, BATCH_SIZE)
                 loss, _ = replay_train(mainDQN, targetDQN, minibatch)
 
                 if i % 1000 == 0:
                     print(i, loss)
+                    saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt") 
                     
             if i % TARGET_UPDATE_FREQUENCY == 0:
                 sess.run(copy_ops)
-        saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt") 
+        
         print ("####################")
         print ("learning process complete")
         print ("####################")       
@@ -249,9 +252,9 @@ def main():
         saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
-        sess.run(copy_ops)
+        w = sess.run(copy_ops)
         
-        print(copy_ops);
+        print(w);
         sleep(10)
         
         for i in range(10000):
@@ -313,7 +316,7 @@ def main():
                 winFlag = 1
             elif(env.choScore < env.hanScore):
                 winFlag = 2
-            
+            '''
             rt_deque = end_game_process(mainDQN, temp_replay_buffer, winFlag)
             replay_buffer.extend(rt_deque)
 
@@ -338,12 +341,12 @@ def main():
                     sess.run(copy_ops)
 
             saver.save(sess, CURRENT_PATH + "/cnn/model.ckpt")
-
+            '''
         # End of All Episode 
         
         
         
         
         
-learn_from_db()        
-#main()
+#learn_from_db()        
+main()

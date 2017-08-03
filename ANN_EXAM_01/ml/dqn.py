@@ -35,7 +35,7 @@ class DQN:
             net = tf.layers.dense(net, 10, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(net, 10, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(net, 10, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 3, activation=tf.nn.softmax, kernel_initializer=tf.contrib.layers.xavier_initializer(),  name="input_y")
+            net = tf.layers.dense(net, self.output_size, activation=tf.nn.softmax, kernel_initializer=tf.contrib.layers.xavier_initializer(),  name="input_y")
             
             
             self._Qpred = net
