@@ -162,6 +162,33 @@ class Game():
         rt = np.concatenate((choMap, hanMap), 2)
         return rt
     
+    def getCustomMoveMap(self, _map, pre_x, pre_y, new_x, new_y):
+        map = copy.deepcopy(_map)
+        map[new_y][new_x] = map[pre_y][pre_x];
+        map[pre_y][pre_x] = 0
+        return map
+    
+    def getCustomState(self, _map):
+        choMap = self.getCustomUnitMap(1, _map)
+        hanMap = self.getCustomUnitMap(2, _map)
+        choMap =np.array(choMap).reshape(10, 9, 1)
+        hanMap =np.array(hanMap).reshape(10, 9, 1)
+        rt = np.concatenate((choMap, hanMap), 2)
+        return rt
+    
+    def getCustomUnitMap(self, flag, _map):
+        map = copy.deepcopy(_map)
+        
+        for i in range(len(map)):
+            for j in range(len(map[i])):
+                obj = map[i][j];
+                if isinstance(obj, Unit):
+                    if(obj.getFlag() != flag):
+                        map[i][j] = 0
+                    else:
+                        map[i][j] = obj.getScore()
+        return map
+    
     def getUnitMap(self, flag):
         map = copy.deepcopy(self.getMap())
         

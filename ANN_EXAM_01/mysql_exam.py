@@ -9,7 +9,5 @@ import numpy as np;
 
 parsor = JsonParsorClass()
 
-a = parsor.getPanList(4)
-
-b = np.array([x['win'] for x in a]);
-print (b);
+a = np.array([ x['turnCount'] for x in parsor.getRandomPanList(5, 0.9)])
+print(a)
