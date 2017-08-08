@@ -19,8 +19,8 @@ class DQN:
         with tf.variable_scope(self.net_name):
             self.learn_rate = tf.constant(0.01, dtype=tf.float32)
             
-            self._X = tf.placeholder(tf.float32, [None, 10, 9, 3], name="input_x")
-            net = tf.layers.conv2d(self._X, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            self._MAP = tf.placeholder(tf.float32, [None, 10, 9, 3], name="input_x")
+            net = tf.layers.conv2d(self._MAP, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.conv2d(net, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.conv2d(net, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.conv2d(net, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
@@ -49,13 +49,13 @@ class DQN:
             self._train = optimizer.minimize(self._loss)
             
     def accuracy_check(self, state, y):
-        feed = {self._X: state, self._Y: y}
+        feed = {self._MAP: state, self._Y: y}
         return self.session.run([self._Qpred, self._accuracy], feed_dict=feed)
             
     def predict(self, state) :
-        feed = {self._X: state}
+        feed = {self._MAP: state}
         return self.session.run(self._Qpred, feed_dict=feed)
     
     def update(self, x_stack: np.ndarray, y_stack: np.ndarray) -> list:
-        feed = {self._X: x_stack, self._Y: y_stack}
+        feed = {self._MAP: x_stack, self._Y: y_stack}
         return self.session.run([self._loss, self._train], feed)
