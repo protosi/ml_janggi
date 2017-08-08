@@ -2,6 +2,8 @@
 Created on 2017. 8. 7.
 
 @author: 3F8VJ32
+
+맵 정보를 받아 좌표정보를 내놓는 인공지능
 '''
 import tensorflow as tf
 import numpy as np

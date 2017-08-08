@@ -59,7 +59,8 @@ def test_from_db(mainDQN: DQN2, train_batch) :
     , 'turnFlag': 2 #1 cho, 2 han
     , 'win': 2}
     '''
-    states = np.vstack([[x['state']] for x in train_batch])           
+    states = np.vstack([[x['state']] for x in train_batch])       
+        
     pre_x = np.vstack([x['pre_x'] for x in train_batch])
     pre_y = np.vstack([x['pre_y'] for x in train_batch])
     new_x = np.vstack([x['new_x'] for x in train_batch])
