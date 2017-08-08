@@ -120,7 +120,7 @@ def learn_from_db(learning_episodes = 100000000):
         
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
-        #saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
+        saver.restore(sess, CURRENT_PATH + "/cnn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
         weight = sess.run(copy_ops)

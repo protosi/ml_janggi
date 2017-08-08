@@ -4,6 +4,8 @@ Created on 2017. 8. 8.
 @author: 3F8VJ32
 
 맵정보를 가지고 좌표정보 [x1, y1, x2, y2]를 뽑는 인공신경망의 학습 로직부분
+이부분은 DQN이 아니라, 교사학습(지도학습)으로 수행한 부분
+교사학습에서 학습의 가능성을 확인하였으며, 이를 토대로 DQN을 개발
 
 '''
 from collections import deque
@@ -70,6 +72,10 @@ def test_from_db(mainDQN: DQN2, train_batch) :
     pred, acc = mainDQN.accuracy_check(states, pos)
     return pred, acc
 
+'''
+    train_batch의 데이터를 가지고 학습하는 함수
+    당연히 
+'''
 def train_dqn_from_db(mainDQN: DQN2, targetDQN: DQN2, train_batch):
     states = np.vstack([[x['state']] for x in train_batch])       
     
@@ -80,7 +86,14 @@ def train_dqn_from_db(mainDQN: DQN2, targetDQN: DQN2, train_batch):
     pos = np.concatenate([pre_x, pre_y, new_x, new_y], axis=1)
     
     return pos, mainDQN.update(states, pos)
-    
+
+'''
+    get_replay_deque_from_db 
+    DB에서 저장된 기보 데이터를 불러오는 함수
+    turn_rate 가 0.01 보다 작으면 game에서 랜덤 1000개를...
+    turn_rate가 0.01 보다 크면, pan에서 무작위 추출을 한다.
+    조회속도에서 차이가 있다.
+'''
 def get_replay_deque_from_db(list_size= 10000, turn_rate=0.0):
     jParsor = JsonParsorClass()
     rt_deque = deque(maxlen=REPLAY_MEMORY);
@@ -98,6 +111,10 @@ def get_replay_deque_from_db(list_size= 10000, turn_rate=0.0):
         rt_deque.append(x)
     return rt_deque    
 
+'''
+    get_copy_var_ops
+    targetDQN을 복사할 때 쓰는 함수
+'''
 def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Operation]:
 
     # Copy variables src_scope to dest_scope
