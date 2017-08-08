@@ -163,7 +163,7 @@ class UnitPo(Unit):
                     and (current_map[now_y+2][now_x-2] == 0
                     or (current_map[now_y+2][now_x-2].getFlag() != self.getFlag() and isinstance(current_map[now_y+2][now_x-2], UnitPo) == False))):
                         map[now_y+2][now_x-2] = 1
-                        list.append(Pos(now_x+2, now_y-2))
+                        list.append(Pos(now_x-2, now_y+2))
                         
                 if now_y == 2:
                     if(current_map[now_y-1][now_x+1] != 0 and isinstance(current_map[now_y-1][now_x+1], UnitPo) == False
