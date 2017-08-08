@@ -32,9 +32,9 @@ class DQN:
             net = tf.layers.conv2d(net, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.max_pooling2d(net, pool_size=[2, 2], strides=1)
             net = tf.reshape(net, [-1, 576])
-            net = tf.layers.dense(net, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 100, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 576, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 576, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 576, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(net, self.output_size, activation=tf.nn.softmax, kernel_initializer=tf.contrib.layers.xavier_initializer(),  name="input_y")
             
             
@@ -56,6 +56,6 @@ class DQN:
         feed = {self._MAP: state}
         return self.session.run(self._Qpred, feed_dict=feed)
     
-    def update(self, x_stack: np.ndarray, y_stack: np.ndarray) -> list:
-        feed = {self._MAP: x_stack, self._Y: y_stack}
+    def update(self, state: np.ndarray, values: np.ndarray) -> list:
+        feed = {self._MAP: state, self._Y: values}
         return self.session.run([self._loss, self._train], feed)
