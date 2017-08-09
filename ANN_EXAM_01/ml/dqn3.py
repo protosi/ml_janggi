@@ -21,14 +21,20 @@ class DQN3:
         
     def _build_network(self):
         with tf.variable_scope(self.net_name):
-            self.learn_rate = tf.constant(0.01, dtype=tf.float32)
+            self.learn_rate = tf.constant(0.1, dtype=tf.float32)
             
             '''
             이미지 처리 부분, output은 총 576개 (모양은 다름)
             5개층이 너무 적지는 않을까... 고민
+            일단 10개로 늘려보고 많으면 줄이자.
             '''
             self._MAP = tf.placeholder(tf.float32, [None, 10, 9, 3], name="input_map")
             net_map = tf.layers.conv2d(self._MAP, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
@@ -42,8 +48,8 @@ class DQN3:
             이를 (-1, 40)으로 선형시킨다. 
             '''
             
-            self._POS = tf.placeholder(tf.float32, [None, 4], name="input_pos")
-            net_pos = tf.contfib.layers.one_hot_encoding(self._POS, 10)
+            self._POS = tf.placeholder(tf.int32, [None, 4], name="input_pos")
+            net_pos = tf.contrib.layers.one_hot_encoding(self._POS, 10)
             net_pos = tf.reshape(net_pos, [-1, 40])
                         
             net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
@@ -59,7 +65,11 @@ class DQN3:
             net = tf.layers.dense(net_map, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(net, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net = tf.layers.dense(net, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, self.output_size, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer(),  name="output_pos")
+            
+            '''
+            결과값 QValue는 -1 ~ 1 사이의 값이다.
+            '''
+            net = tf.layers.dense(net, self.output_size, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer(),  name="output_pos")
             
             
             self._Qpred = net

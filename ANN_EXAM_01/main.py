@@ -3,7 +3,7 @@ Created on 2017. 6. 15.
 
 @author: 3F8VJ32
 '''
-
+from UnitCha import UnitCha
 from Game import Game;
 from time import sleep
 import os
@@ -23,14 +23,8 @@ import copy
     8    [     0,      0,      0,      0, R_GUNG,      0,      0,      0,      0], 
     9    [ R_CHA,   R_MA, R_SANG,   R_SA,      0,   R_SA, R_SANG,   R_MA,  R_CHA]
     '''
-game = Game();
-game.printMap()
-    
 
-while game.isGame:
-    game.printMap()
-    game.doMinMax(game.getMap(), game.m_depth, None, game.getTurn(), game.getTurn())
-
+print(UnitCha.staticScore)
 
 
 if __name__ == '__main__':

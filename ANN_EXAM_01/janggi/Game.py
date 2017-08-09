@@ -127,6 +127,80 @@ class Game():
         self.addObjToMap(8, 6, UnitJol(2, self));
     
     
+    
+    '''
+        state를 map 배치로 전환하는 함수
+    '''
+    def setMapByState(self, state):
+        
+        # 게임 및 맵 초기화
+        self.initGame()
+        self.initMap()
+        
+        self.turn = -1
+        chomap = state[0]
+        hanmap = state[1]
+        turnmap = state[2]
+        
+        # map 처리
+        for y in range(len(chomap)):
+            for x in range(len(chomap[y])):
+                
+                if self.turn == -1 and turnmap[y][x] == 1 and chomap[y][x] != 0:
+                    self.setTurn(1)
+                elif self.turn == -1 and turnmap[y][x] == 1 and hanmap[y][x] != 0:
+                    self.setTurn(2)
+            
+                # 졸 처리
+                if chomap[y][x] == UnitJol.staticScore:
+                    self.addObjToMap(x, y, UnitJol(1, self));
+                
+                if hanmap[y][x] == UnitJol.staticScore:
+                    self.addObjToMap(x, y, UnitJol(2, self));
+                    
+                # 상 처리
+                if chomap[y][x] == UnitSang.staticScore:
+                    self.addObjToMap(x, y, UnitSang(1, self));
+                
+                if hanmap[y][x] == UnitSang.staticScore:
+                    self.addObjToMap(x, y, UnitSang(2, self));
+                    
+                # 마 처리
+                if chomap[y][x] == UnitMa.staticScore:
+                    self.addObjToMap(x, y, UnitMa(1, self));
+                
+                if hanmap[y][x] == UnitMa.staticScore:
+                    self.addObjToMap(x, y, UnitMa(2, self));
+                    
+                # 포 처리
+                if chomap[y][x] == UnitPo.staticScore:
+                    self.addObjToMap(x, y, UnitPo(1, self));
+                
+                if hanmap[y][x] == UnitPo.staticScore:
+                    self.addObjToMap(x, y, UnitPo(2, self));
+                    
+                # 차 처리
+                if chomap[y][x] == UnitCha.staticScore:
+                    self.addObjToMap(x, y, UnitCha(1, self));
+                
+                if hanmap[y][x] == UnitCha.staticScore:
+                    self.addObjToMap(x, y, UnitCha(2, self));
+                    
+                # 사 처리
+                if chomap[y][x] == UnitSa.staticScore:
+                    self.addObjToMap(x, y, UnitSa(1, self));
+                
+                if hanmap[y][x] == UnitSa.staticScore:
+                    self.addObjToMap(x, y, UnitSa(2, self));
+                    
+                # 궁 처리
+                if chomap[y][x] == UnitGung.staticScore:
+                    self.addObjToMap(x, y, UnitGung(1, self));
+                
+                if hanmap[y][x] == UnitGung.staticScore:
+                    self.addObjToMap(x, y, UnitGung(2, self));    
+    
+    
     def doGame(self, pos):
         
         myTurn  = self.getTurn()
@@ -138,6 +212,19 @@ class Game():
             done = True
         
         return reward, done
+    
+    def getPossibleMoveListfromCustomMap(self, _map, flag):
+        map = copy.deepcopy(_map)        
+        list = np.hstack(map)
+        rt = []
+        for i in range(len(list)):
+            if isinstance(list[i], Unit):
+                if(list[i].getFlag() == flag):
+                    _, mvlist = list[i].getPossibleMoveList()
+
+                    for j in range(len(mvlist)):
+                        rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
+        return rt;
     
     def getPossibleMoveList(self, flag):
         
@@ -161,6 +248,75 @@ class Game():
         hanMap =np.array(hanMap).reshape(10, 9, 1)
         rt = np.concatenate((choMap, hanMap), 2)
         return rt
+    
+    '''
+        state로 CustomMap을 만드는 함수
+    '''
+    def getCustomMapByState(self, state):
+        
+        turn = -1
+        map = self.getEmptyMap()
+
+        
+        # map 처리
+        for y in range(len(state)):
+            for x in range(len(state[y])):
+                
+                if turn == -1 and state[y][x][2] == 1 and state[y][x][0] != 0:
+                    turn = 1
+                elif self.turn == -1 and state[y][x][2] == 1 and state[y][x][1] != 0:
+                    turn = 2
+            
+                # 졸 처리
+                if state[y][x][0] == UnitJol.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitJol(1, self), map);
+                
+                if state[y][x][1] == UnitJol.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitJol(2, self), map);
+                    
+                # 상 처리
+                if state[y][x][0] == UnitSang.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitSang(1, self), map);
+                
+                if state[y][x][1] == UnitSang.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitSang(2, self), map);
+                    
+                # 마 처리
+                if state[y][x][0] == UnitMa.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitMa(1, self), map);
+                
+                if state[y][x][1] == UnitMa.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitMa(2, self), map);
+                    
+                # 포 처리
+                if state[y][x][0] == UnitPo.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitPo(1, self), map);
+                
+                if state[y][x][1] == UnitPo.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitPo(2, self), map);
+                    
+                # 차 처리
+                if state[y][x][0] == UnitCha.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitCha(1, self), map);
+                
+                if state[y][x][1] == UnitCha.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitCha(2, self), map);
+                    
+                # 사 처리
+                if state[y][x][0] == UnitSa.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitSa(1, self), map);
+                
+                if state[y][x][1] == UnitSa.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitSa(2, self), map);
+                    
+                # 궁 처리
+                if state[y][x][0] == UnitGung.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitGung(1, self), map);
+                
+                if state[y][x][1] == UnitGung.staticScore:
+                    map = self.addObjToCustomMap(x, y, UnitGung(2, self), map);    
+        
+        return map, turn
     
     def getCustomMoveMap(self, _map, pre_x, pre_y, new_x, new_y):
         map = copy.deepcopy(_map)
@@ -712,6 +868,12 @@ class Game():
     
     def setMap(self, map):
         self.map = map;
+        
+    def addObjToCustomMap(self, x, y, obj, map):
+        map[y][x] = obj
+        if isinstance(obj, Unit) == True:
+            obj.setPos(x, y);
+        return map
     
     def addObjToMap(self, x, y, obj):
         self.map[y][x] = obj;    
