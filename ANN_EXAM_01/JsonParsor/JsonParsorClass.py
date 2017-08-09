@@ -77,11 +77,12 @@ class JsonParsorClass(object):
         new_y = row[9]
         turnFlag = self.constantDic.get(row[10])
         moveUnit = row[11]
+        done = row[12]
         
         return {"win":win, "turnCount":turnCount, "state": state, 
                 "next_state": next_state, "pre_x": pre_x, "pre_y" : pre_y, 
                 "new_x": new_x, "new_y": new_y, "turnFlag": turnFlag, 
-                "moveUnit": moveUnit}
+                "moveUnit": moveUnit, "done": done}
     
     def getPanList(self, game_idx):
         cur = self._selectQuery(self.sqlJanggiPan, game_idx)

@@ -52,9 +52,9 @@ class DQN3:
             net_pos = tf.contrib.layers.one_hot_encoding(self._POS, 10)
             net_pos = tf.reshape(net_pos, [-1, 40])
                         
-            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net_pos = tf.layers.dense(net_pos, 40, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             '''
             두 선형 결과를 결합한다.
@@ -62,9 +62,9 @@ class DQN3:
             '''
             net = tf.concat([net_map, net_pos], axis=1)
             
-            net = tf.layers.dense(net_map, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 616, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net_map, 616, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 616, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 616, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             '''
             결과값 QValue는 -1 ~ 1 사이의 값이다.
@@ -78,8 +78,8 @@ class DQN3:
             self._loss = tf.losses.mean_squared_error(self._Y, self._Qpred)
             self._predicted = tf.cast(self._Qpred > 0.5 , tf.float32)
             self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._predicted, self._Y), dtype=tf.float32))
-            #optimizer = tf.train.AdamOptimizer(learning_rate=self._learn_rate)
-            optimizer = tf.train.AdadeltaOptimizer(learning_rate=self.learn_rate)
+            optimizer = tf.train.AdamOptimizer(learning_rate=self.learn_rate)
+            #optimizer = tf.train.AdadeltaOptimizer(learning_rate=self.learn_rate)
             self._train = optimizer.minimize(self._loss)
             
     def accuracy_check(self, state, pos, values):

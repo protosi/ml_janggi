@@ -246,7 +246,21 @@ class Game():
         hanMap = self.getUnitMap(2)
         choMap =np.array(choMap).reshape(10, 9, 1)
         hanMap =np.array(hanMap).reshape(10, 9, 1)
-        rt = np.concatenate((choMap, hanMap), 2)
+        maskMap = np.zeros((10, 9, 1))
+        
+        # 초인 경우
+        if(self.turn == 1):
+            for i in range(len(choMap)):
+                for j in range(len(choMap[i])):
+                    if choMap[i][j][0] > 0:
+                        maskMap[i][j][0] = 1
+        elif(self.turn == 2):
+            for i in range(len(hanMap)):
+                for j in range(len(hanMap[i])):
+                    if hanMap[i][j][0] > 0:
+                        maskMap[i][j][0] = 1
+        
+        rt = np.concatenate((choMap, hanMap, maskMap), 2)
         return rt
     
     '''

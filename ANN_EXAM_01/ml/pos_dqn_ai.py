@@ -18,6 +18,8 @@ from JsonParsorClass import JsonParsorClass
 from dqn3 import DQN3
 import numpy as np
 import tensorflow as tf
+import time
+from tensorflow.contrib.labeled_tensor import batch
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 REPLAY_MEMORY = 2000000
@@ -25,11 +27,33 @@ BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
 DISCOUNT_RATE = 0.9
 
+def get_min_max_qvalue(targetDQN: DQN3, env: Game, next_state, turnFlag):
+    map, _ = env.getCustomMapByState(next_state)
+    poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
+    state_list = []
+    min = 1
+    max = -1
+    for pos in poslist:
+        state_list.append(next_state)
+
+    if len(poslist) <= 0:
+        print("poslist is zero")
+    elif len(poslist) == len(state_list):
+        values = targetDQN.predict(state_list, poslist)
+        min = np.min(values)
+        max = np.max(values)
+    state_list.clear()
+    
+
+    return min, max
+    
+
 def get_min_qvalue(targetDQN: DQN3, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
     poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
     minvalue = 1
     temp = []
+    
     for pos in poslist:
         value = targetDQN.predict([next_state], [pos])
         temp.append(value[0][0])
@@ -75,43 +99,57 @@ def replay_train(mainDQN: DQN3, targetDQN: DQN3, env, train_batch):
     
     # pos array를 만든다.
     pos = np.concatenate([pre_x, pre_y, new_x, new_y], axis=1)
-    loss = []
-    for i in range(len (winFlags)):
-        _loss , _ = train_dqn(mainDQN, targetDQN, env, states[i], pos[i], next_states[i], turnFlags[i], done[i], winFlags[i]);
-        loss.append(loss)
+    #loss = []
+    #for i in range(len (winFlags)):
+    #    _loss , _ = train_dqn(mainDQN, targetDQN, env, states[i], pos[i], next_states[i], turnFlags[i], done[i], winFlags[i]);
+    #    loss.append(loss)
+    
+    # 한꺼번에 처리하도록 변경 
+    loss , _ = train_dqn(mainDQN, targetDQN, env, states, pos, next_states, turnFlags, done, winFlags);
         
     return loss
     
     
 
 def train_dqn(mainDQN: DQN3, targetDQN: DQN3, env: Game, state, action, next_state, turnFlag,  done, winFlag):
-    reward = 0
-    if done:
-        if turnFlag == winFlag:
-            # 승리시 1점
-            reward = 1
-        else:
-            # 패배시 -1점
-            reward = -1     
+    reward = np.zeros(len(winFlag))
+    next_flag = np.zeros(len(winFlag))
+    QValue = np.zeros((len(winFlag), 1))
     
-    next_flag = 0
-    if turnFlag == 1:
-        next_flag = 2
-    elif turnFlag == 2:
-        next_flag = 1
-    '''
-        이후 인공신경망의 추가적인 학습 규칙은 여기서 reward값을 변경하면 된다.
-        가령 공격적인 성향을 갖게끔 하려면, 50 수 이전에 게임이 끝나면 
-        reward값에 가점을 주어 공격적인 성향을 갖게 하거나,
-        상대방보다 점수가 높은 상태라면 가점을 주어서 방어적인 성격을 
-        갖게 하면 된다.
-    '''    
-    if done != True:
-        QValue = reward - get_min_qvalue(targetDQN, env, next_state, next_flag) - get_max_qvalue(targetDQN, env, next_state, next_flag)
+    for i in range(len(winFlag)):
+    
+        if done[i]:
+            if turnFlag[i] == winFlag[i]:
+                # 승리시 1점
+                reward[i] = 1
+            else:
+                # 패배시 -1점
+                reward[i] = -1     
+    
+        
+        if turnFlag[i] == 1:
+            next_flag[i] = 2
+        elif turnFlag[i] == 2:
+            next_flag[i] = 1
+        '''
+            이후 인공신경망의 추가적인 학습 규칙은 여기서 reward값을 변경하면 된다.
+            가령 공격적인 성향을 갖게끔 하려면, 50 수 이전에 게임이 끝나면 
+            reward값에 가점을 주어 공격적인 성향을 갖게 하거나,
+            상대방보다 점수가 높은 상태라면 가점을 주어서 방어적인 성격을 
+            갖게 하면 된다.
+        '''    
+        
+        min, max = get_min_max_qvalue(targetDQN, env, next_state[i], next_flag[i])
+    
+        if done[i] != True:
+            #QValue[i][0] = reward[i] - get_min_qvalue(targetDQN, env, next_state[i], next_flag[i]) - get_max_qvalue(targetDQN, env, next_state[i], next_flag[i])
 
-    else:
-        QValue = reward
-    return mainDQN.update([state], [action], [[QValue]])
+            QValue[i][0] = reward[i] - min - max
+
+        else:
+            QValue[i][0] = reward[i]
+
+    return mainDQN.update(state, action, QValue)
     
 '''
     convertToOneHot
@@ -171,6 +209,33 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
         op_holder.append(dest_var.assign(src_var.value()))
     return op_holder
 
+def test_play(mainDQN: DQN3):
+    env = Game()
+    done = False
+    ML = np.random.randint(2) + 1
+    env.initGame()
+    env.printMap()
+    while not done:
+        
+        
+        turnFlag = env.getTurn()
+        state = env.getState()
+        
+        if turnFlag == ML:
+            poslist = env.getPossibleMoveList(turnFlag)
+            maxvalue = -1
+            maxpos = []
+            for pos in poslist:
+                value = mainDQN.predict([state], [pos])
+                if maxvalue < value[0][0]:
+                    maxvalue = value[0][0]
+                    maxpos = pos
+            print("ml think best move is ", maxpos, "(", maxvalue , ")")
+        else:
+            maxpos = env.getMinMaxPos()
+        _, done = env.doGame(maxpos)
+
+        env.printMap()
 
 def learning_from_db(learning_episodes = 100000000):
     
@@ -192,7 +257,7 @@ def learning_from_db(learning_episodes = 100000000):
         saver = tf.train.Saver()
         
         game = Game()
-        #saver.restore(sess, CURRENT_PATH + "/pos/model.ckpt")
+        saver.restore(sess, CURRENT_PATH + "/pos_dqn/model.ckpt")
         
         copy_ops = get_copy_var_ops(dest_scope_name="main_pos_dqn", src_scope_name="target_pos_dqn")
         weight = sess.run(copy_ops)
@@ -204,19 +269,19 @@ def learning_from_db(learning_episodes = 100000000):
         for i in range(learning_episodes):
             if len(replay_buffer) > BATCH_SIZE:
                 minibatch = random.sample(replay_buffer, BATCH_SIZE)
-                
-                replay_train(mainDQN, targetDQN, game, minibatch)
-                
+                start_time = time.time()
+                loss =replay_train(mainDQN, targetDQN, game, minibatch)
+                end_time = time.time()
                 if i % TARGET_UPDATE_FREQUENCY == 0:
                     w = sess.run(copy_ops)
                     
-                    if i % 10000 == 0 and i != 0:
+                    if i % 100 == 0 :
+                        
+                        test_play(mainDQN)
                         print (w)
-                
+                print("{} steps ({} learns per step) {} seconds spent, loss: {}".format(i, BATCH_SIZE, end_time - start_time, loss))
                 if i % 100 == 0 and i != 0:
                     #pred, acc = test_from_db(mainDQN, minibatch)
-                    #print("{} steps accuracy: {}, and loss: {}".format(i, acc, loss[0]))
-                    print("{} steps")
                     saver.save(sess, CURRENT_PATH + "/pos_dqn/model.ckpt") 
                     
                     
