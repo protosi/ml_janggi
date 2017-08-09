@@ -8,12 +8,14 @@ from Unit import Unit
 from Pos import Pos
 
 class UnitCha(Unit):
+    
+    staticScore = 1000
 
 
     def __init__(self, flag, Game):
         super(self.__class__, self).__init__(flag, Game);
         self.setName("CHA");
-        self.setScore(1000);
+        self.setScore(self.staticScore);
         
     
     def getPossibleMoveList(self):

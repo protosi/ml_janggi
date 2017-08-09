@@ -9,11 +9,12 @@ from Pos import Pos
 
 class UnitMa(Unit):
 
+    staticScore = 700
 
     def __init__(self, flag, Game):
         super(self.__class__, self).__init__(flag, Game);
         self.setName("MA");
-        self.setScore(700);
+        self.setScore(self.staticScore);
         
     
     def getPossibleMoveList(self):

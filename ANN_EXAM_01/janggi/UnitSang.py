@@ -8,6 +8,8 @@ from Unit import Unit
 from Pos import Pos
 
 class UnitSang(Unit):
+    
+    
 
 
     def __init__(self, flag, Game):

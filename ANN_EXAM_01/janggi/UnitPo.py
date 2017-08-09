@@ -8,12 +8,14 @@ from Unit import Unit
 from Pos import Pos
 
 class UnitPo(Unit):
+    
+    staticScore = 850
 
 
     def __init__(self, flag, Game):
         super(self.__class__, self).__init__(flag, Game);
         self.setName("PO");
-        self.setScore(850);
+        self.setScore(self.staticScore);
         
     
     def getPossibleMoveList(self):
