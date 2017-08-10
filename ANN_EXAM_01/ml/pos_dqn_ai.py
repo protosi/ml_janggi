@@ -85,7 +85,7 @@ def replay_train(mainDQN: DQN3, targetDQN: DQN3, env, train_batch):
     , 'new_x': 7, 'new_y': 6
     , 'turnCount': 48
     , 'turnFlag': 2 #1 cho, 2 han
-    , 'win': 2}
+    , 'win': 2, 'done' : 0}
     '''
     states = np.vstack([[x['state']] for x in train_batch])
     next_states = np.vstack([[x['next_state']] for x in train_batch])
@@ -96,7 +96,7 @@ def replay_train(mainDQN: DQN3, targetDQN: DQN3, env, train_batch):
     pre_y = np.vstack([x['pre_y'] for x in train_batch])
     new_x = np.vstack([x['new_x'] for x in train_batch])
     new_y = np.vstack([x['new_y'] for x in train_batch])
-    done = np.array([x['new_y'] for x in train_batch])
+
     
     # pos array를 만든다.
     pos = np.concatenate([pre_x, pre_y, new_x, new_y], axis=1)
@@ -221,6 +221,69 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
     for src_var, dest_var in zip(src_vars, dest_vars):
         op_holder.append(dest_var.assign(src_var.value()))
     return op_holder
+
+def learn_from_play(EPISODES = 10000):
+    
+    sess = tf.InteractiveSession()
+    mainDQN = DQN3(sess, name="main1")
+    targetDQN = DQN3(sess, name="target1")
+    
+    
+    saver = tf.train.Saver()
+    saver.restore(sess, CURRENT_PATH + "/pos_dqn/model.ckpt")
+    
+    copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
+    weight = sess.run(copy_ops)
+    print(weight)
+    env = Game()
+    
+    for i in range(EPISODES):
+        env.initGame()
+        done = False
+        temp_replay = deque()
+        replay_buffer = deque()
+        while not done:
+            turnFlag = env.getTurn()
+            state = env.getState()
+            maxvalue = -1
+            maxpos = []
+            poslist = env.getPossibleMoveList(turnFlag)
+            for pos in poslist:
+                value, one_hot = mainDQN.predict_test([state], [pos])
+                print(pos, value)
+                if maxvalue < value[0][0]:
+                    maxvalue = value[0][0]
+                    maxpos = pos
+            _, done = env.doGame(maxpos)
+            env.printMap()
+            next_state = env.getState()
+            temp_replay.append({'state': state, 'next_state': next_state, 'pos': pos, 'turn': turnFlag, 'done': done})
+    
+            if done:
+                winFlag = 0
+                if env.choScore > env.hanScore:
+                    winFlag = 1
+                elif env.hanScore > env.choScore:
+                    winFlag = 2
+                    
+                for row in temp_replay:
+                    '''
+                        {'state': array(...)
+                        , 'next_state': array(...)
+                        , 'moveUnit': 'R_JOL'
+                        , 'pre_x': 8, 'pre_y': 6
+                        , 'new_x': 7, 'new_y': 6
+                        , 'turnCount': 48
+                        , 'turnFlag': 2 #1 cho, 2 han
+                        , 'win': 2}
+                    '''
+                    
+                    replay_buffer.append({'state': row['state'], 'next_state': row['next_state'], 'pre_x': row['pos'][0], 'pre_y': row['pos'][1], 'new_x': row['pos'][2], 
+                                          'new_y': row['pos'][3], 'turnCount': -1, 'turnFlag': row['turn'] })
+                    
+                
+                    
+
 
 def test_play(mainDQN: DQN3):
     env = Game()
