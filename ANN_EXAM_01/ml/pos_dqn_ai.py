@@ -40,6 +40,7 @@ def get_min_max_qvalue(targetDQN: DQN3, env: Game, next_state, turnFlag):
         print("poslist is zero")
     elif len(poslist) == len(state_list):
         values = targetDQN.predict(state_list, poslist)
+
         min = np.min(values)
         max = np.max(values)
     state_list.clear()
@@ -125,7 +126,19 @@ def train_dqn(mainDQN: DQN3, targetDQN: DQN3, env: Game, state, action, next_sta
             else:
                 # 패배시 -1점
                 reward[i] = -1     
-    
+                
+        else:
+            sum = np.sum(np.sum(next_state[i], axis=0),axis=0)
+            '''            
+            if turnFlag[i] == 1 and sum[0] > sum[1]:
+                reward[i] = 0.2
+            elif turnFlag[i] == 1 and sum[0] < sum[1]:
+                reward[i] = -0.2
+            elif turnFlag[i] == 2 and sum[0] < sum[1]:
+                reward[i] = 0.2
+            elif turnFlag[i] == 2 and sum[0] > sum[1]:
+                reward[i] = -0.2
+            '''
         
         if turnFlag[i] == 1:
             next_flag[i] = 2
@@ -139,7 +152,7 @@ def train_dqn(mainDQN: DQN3, targetDQN: DQN3, env: Game, state, action, next_sta
             갖게 하면 된다.
         '''    
         
-        min, max = get_min_max_qvalue(targetDQN, env, next_state[i], next_flag[i])
+        min, max = get_min_max_qvalue(mainDQN, env, next_state[i], next_flag[i])
     
         if done[i] != True:
             #QValue[i][0] = reward[i] - get_min_qvalue(targetDQN, env, next_state[i], next_flag[i]) - get_max_qvalue(targetDQN, env, next_state[i], next_flag[i])
@@ -226,10 +239,12 @@ def test_play(mainDQN: DQN3):
             maxvalue = -1
             maxpos = []
             for pos in poslist:
-                value = mainDQN.predict([state], [pos])
+                value, one_hot = mainDQN.predict_test([state], [pos])
+                print(pos, value)
                 if maxvalue < value[0][0]:
                     maxvalue = value[0][0]
                     maxpos = pos
+
             print("ml think best move is ", maxpos, "(", maxvalue , ")")
         else:
             maxpos = env.getMinMaxPos()
@@ -250,16 +265,16 @@ def learning_from_db(learning_episodes = 100000000):
     print ("####################")
     
     with tf.Session() as sess:
-        mainDQN = DQN3(sess, name="main_pos_dqn")
-        targetDQN = DQN3(sess, name="target_pos_dqn")
+        mainDQN = DQN3(sess, name="main1")
+        targetDQN = DQN3(sess, name="target1")
         
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         
         game = Game()
-        saver.restore(sess, CURRENT_PATH + "/pos_dqn/model.ckpt")
+        #saver.restore(sess, CURRENT_PATH + "/pos_dqn/model.ckpt")
         
-        copy_ops = get_copy_var_ops(dest_scope_name="main_pos_dqn", src_scope_name="target_pos_dqn")
+        copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
         weight = sess.run(copy_ops)
         print(weight)
         print ("####################")
