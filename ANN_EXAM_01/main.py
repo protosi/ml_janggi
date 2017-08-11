@@ -24,8 +24,21 @@ import copy
     9    [ R_CHA,   R_MA, R_SANG,   R_SA,      0,   R_SA, R_SANG,   R_MA,  R_CHA]
     '''
 
-print(UnitCha.staticScore)
 
+game = Game()
+game.initGame()
+
+game.setMove(0, 3, 1, 3)
+game.printMap() 
+game.setMove(8, 6, 7, 6)
+game.printMap() 
+game.setMove(1, 3, 1, 4)
+game.printMap() 
+map = game.getMap()
+mvMap, mvList = map[7][7].getPossibleMoveList()
+
+print (mvMap)
+print (mvList)
 
 if __name__ == '__main__':
     pass
