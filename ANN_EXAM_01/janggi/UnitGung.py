@@ -18,14 +18,15 @@ class UnitGung(Unit):
         self.setScore(self.staticScore);
         
     
-    def getPossibleMoveList(self):
+    def getPossibleMoveList(self, current_map=None):
         # 연산을 위해 위치 정보를 획득한다.
         pos = self.getPos()
         now_x = pos.getXPos()
         now_y = pos.getYPos()
         
         # 현재 맵을 불러온다
-        current_map = self.game.getMap()
+        if current_map == None:
+            current_map = self.game.getMap()
         
         # 리턴할 빈 맵을 하나 생성한다.
         map = self.game.getEmptyMap()

@@ -220,8 +220,11 @@ class Game():
         for i in range(len(list)):
             if isinstance(list[i], Unit):
                 if(list[i].getFlag() == flag):
-                    _, mvlist = list[i].getPossibleMoveList()
-
+                    _, mvlist = list[i].getPossibleMoveList(map)
+                    
+                    if len(mvlist) == 0:
+                        print (flag, list[i].getName() + " has no move", list[i].getX(), list[i].getY());
+                        
                     for j in range(len(mvlist)):
                         rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
         return rt;
@@ -278,7 +281,7 @@ class Game():
                 
                 if turn == -1 and state[y][x][2] == 1 and state[y][x][0] != 0:
                     turn = 1
-                elif self.turn == -1 and state[y][x][2] == 1 and state[y][x][1] != 0:
+                elif turn == -1 and state[y][x][2] == 1 and state[y][x][1] != 0:
                     turn = 2
             
                 # 졸 처리

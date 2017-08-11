@@ -74,7 +74,7 @@ class Unit(metaclass=ABCMeta):
         return self.__str__();
     
     @abstractclassmethod
-    def getPossibleMoveList(self):
+    def getPossibleMoveList(self, current_map=None):
         '''
         .파이썬은 불편 불편해.
         '''
