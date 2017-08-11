@@ -415,5 +415,5 @@ def learning_from_db(learning_episodes = 100000000):
         print ("learning process complete")
         print ("####################")       
         
-#learning_from_db()
-learn_from_play()
+learning_from_db()
+#learn_from_play()

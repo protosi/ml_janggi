@@ -15,7 +15,7 @@ from UnitSa import UnitSa
 from UnitSang import UnitSang
 import random
 import numpy as np
-
+from time import sleep
 class Game():
     
     # 1 = 초, 2 = 한
@@ -222,9 +222,10 @@ class Game():
                 if(list[i].getFlag() == flag):
                     _, mvlist = list[i].getPossibleMoveList(map)
                     
-                    if len(mvlist) == 0:
-                        print (flag, list[i].getName() + " has no move", list[i].getX(), list[i].getY());
-                        
+                    #if len(mvlist) == 0:
+                        #self.printCusomMap(map)
+                        #print (flag, list[i].getName() + " has no move", list[i].getX(), list[i].getY());
+
                     for j in range(len(mvlist)):
                         rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
         return rt;
