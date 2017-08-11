@@ -29,11 +29,6 @@ class DQN2:
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net_map = tf.layers.conv2d(net_map, filters=8, kernel_size=[2,2], padding='same', activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             net_map = tf.layers.max_pooling2d(net_map, pool_size=[2, 2], strides=1)
             net_map = tf.reshape(net_map, [-1, 576])
             

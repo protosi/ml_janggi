@@ -11,7 +11,7 @@ state, action => value
 import tensorflow as tf
 import numpy as np
 
-class DQN3:
+class ChessMoveAI:
     def __init__(self, session, name="main"):
         self.session = session
         self.output_size = 1

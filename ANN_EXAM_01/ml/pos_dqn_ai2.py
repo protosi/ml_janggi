@@ -15,7 +15,7 @@ from time import sleep
 from typing import List
 from Game import Game
 from JsonParsorClass import JsonParsorClass
-from dqn3 import ChessMoveAI
+from dqn4 import ChessMoveAI
 import numpy as np
 import tensorflow as tf
 import time
@@ -25,7 +25,7 @@ CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 REPLAY_MEMORY = 2000000
 BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
-DISCOUNT_RATE = 0.9
+DISCOUNT_RATE = 0.99
 
 def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
@@ -110,7 +110,25 @@ def replay_train(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env, train_batch)
         
     return loss
     
-    
+
+def train_sl(mainDQN: ChessMoveAI, env: Game, state, action):
+
+    map, flag = env.getCustomMapByState(state)
+    posslist = env.getPossibleMoveListfromCustomMap(map, flag)
+    losslist = []
+    if len(posslist) == 0:
+        env.printCusomMap(map)
+        print(flag, len(posslist))
+        
+    for pos in posslist:
+        value = 0
+        if pos[0] == action[0] and pos[1] == action[1] and pos[2] == action[2] and pos[3] == action[3]:
+            value = 1
+            
+        loss, _ = mainDQN.update([state], [pos], [[value]])
+        losslist.append(loss)
+    return np.mean(losslist)
+
 
 def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, action, next_state, turnFlag,  done, winFlag):
     reward = np.zeros(len(winFlag))
@@ -240,12 +258,13 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
 def learn_from_play(EPISODES = 10000):
     
     sess = tf.InteractiveSession()
+    
     mainDQN = ChessMoveAI(sess, name="main1")
     targetDQN = ChessMoveAI(sess, name="target1")
     
-    
+    sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
-    saver.restore(sess, CURRENT_PATH + "/pos_dqn_play/model.ckpt")
+    #saver.restore(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")
     
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
@@ -255,7 +274,7 @@ def learn_from_play(EPISODES = 10000):
     for i in range(EPISODES):
         env.initGame()
         done = False
-        ML = np.random.randint(2) + 1
+        ML = i % 3
         temp_replay = deque()
         
         while not done:
@@ -318,7 +337,7 @@ def learn_from_play(EPISODES = 10000):
                             w = sess.run(copy_ops)
                     w = sess.run(copy_ops)
                     print(w)
-                    saver.save(sess, CURRENT_PATH + "/pos_dqn_play/model.ckpt")  
+                    saver.save(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")  
                 
                     
 
@@ -352,6 +371,55 @@ def test_play(mainDQN: ChessMoveAI):
         _, done = env.doGame(maxpos)
 
         env.printMap()
+
+def super_learning_from_db(learning_episodes = 100000000):
+    
+    print ("####################")
+    print ("load learning data")
+    print ("####################")
+
+    replay_buffer = get_replay_deque_from_db()
+    minibatch = random.sample(replay_buffer, BATCH_SIZE)
+    print ("####################")
+    print ("load learning data done!")
+    print ("####################")
+    
+    sess = tf.InteractiveSession()
+    
+    mainDQN = ChessMoveAI(sess, name="main1")
+    
+    sess.run(tf.global_variables_initializer())
+    saver = tf.train.Saver()
+    
+    game = Game()
+    saver.restore(sess, CURRENT_PATH + "/pos_dqn2/model.ckpt")
+        
+    print ("####################")
+    print ("learning process start")
+    print ("####################")  
+    
+    for i in range(learning_episodes):
+        if len(replay_buffer) > BATCH_SIZE:
+            minibatch = random.sample(replay_buffer, BATCH_SIZE)
+            for row in minibatch:
+                print (np.array(row['state']).shape)
+                map, turn = game.getCustomMapByState(row['state'])
+                game.printCusomMap(map)
+                action = [0,0,0,0]
+                action[0] = row['pre_x']
+                action[1] = row['pre_y']
+                action[2] = row['new_x']
+                action[3] = row['new_y']
+                
+                loss = train_sl(mainDQN, game, row['state'], action)
+                print("{} steps loss: {}".format(i,  loss))
+            if i % 100 == 0:
+                saver.save(sess, CURRENT_PATH + "/pos_dqn2/model.ckpt")
+                
+                
+                
+                    
+                    
 
 def learning_from_db(learning_episodes = 100000000):
     
@@ -416,4 +484,5 @@ def learning_from_db(learning_episodes = 100000000):
         print ("####################")       
         
 #learning_from_db()
-learn_from_play()
+#learn_from_play()
+super_learning_from_db()
