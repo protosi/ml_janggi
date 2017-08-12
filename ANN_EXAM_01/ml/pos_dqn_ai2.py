@@ -264,7 +264,7 @@ def learn_from_play(EPISODES = 10000):
     
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
-    #saver.restore(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")
+    saver.restore(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")
     
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
@@ -414,9 +414,20 @@ def super_learning_from_db(learning_episodes = 100000000):
                 loss = train_sl(mainDQN, game, row['state'], action)
                 print("{} steps loss: {}".format(i,  loss))
             if i % 100 == 0:
+                test_play(mainDQN)
                 saver.save(sess, CURRENT_PATH + "/pos_dqn2/model.ckpt")
-                
-                
+
+            # 1000번마다 데이터를 새로 로드함                
+            if i % 1000 == 0 and i != 0:
+                print ("####################")
+                print ("load learning data")
+                print ("####################")
+            
+                replay_buffer = get_replay_deque_from_db()
+                minibatch = random.sample(replay_buffer, BATCH_SIZE)
+                print ("####################")
+                print ("load learning data done!")
+                print ("####################")    
                 
                     
                     
@@ -484,5 +495,5 @@ def learning_from_db(learning_episodes = 100000000):
         print ("####################")       
         
 #learning_from_db()
-#learn_from_play()
-super_learning_from_db()
+learn_from_play()
+#super_learning_from_db()
