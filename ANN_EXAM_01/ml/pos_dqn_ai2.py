@@ -146,23 +146,23 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
                 reward[i] = -1     
                 
         else:
-            '''
+            
             sum = np.sum(np.sum(next_state[i], axis=0),axis=0)
             
             if turnFlag[i] == 1:
                 reward[i] =  (sum[0] - sum[1]) / (sum[0] + 1)
             elif turnFlag[i] == 2:
                 reward[i] =  (sum[1] - sum[0]) / (sum[1] + 1)
-            '''
+            
             '''            
             if turnFlag[i] == 1 and sum[0] > sum[1]:
-                reward[i] = 0.2
+                reward[i] += 0.2
             elif turnFlag[i] == 1 and sum[0] < sum[1]:
-                reward[i] = -0.2
+                reward[i] -= 0.2
             elif turnFlag[i] == 2 and sum[0] < sum[1]:
-                reward[i] = 0.2
+                reward[i] += 0.2
             elif turnFlag[i] == 2 and sum[0] > sum[1]:
-                reward[i] = -0.2
+                reward[i] -= 0.2
             '''
         
         if turnFlag[i] == 1:
@@ -260,12 +260,12 @@ def learn_from_play(EPISODES = 10000):
     sess = tf.InteractiveSession()
     
     mainDQN = ChessMoveAI(sess, name="main1")
-    targetDQN = ChessMoveAI(sess, name="target1")
+    
     
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
     saver.restore(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")
-    
+    targetDQN = ChessMoveAI(sess, name="target1")
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
     print(weight)
@@ -338,7 +338,9 @@ def learn_from_play(EPISODES = 10000):
                     w = sess.run(copy_ops)
                     print(w)
                     saver.save(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")  
-                
+                    print("################")
+                    print("model saved")
+                    print("################")
                     
 
 
@@ -495,5 +497,5 @@ def learning_from_db(learning_episodes = 100000000):
         print ("####################")       
         
 #learning_from_db()
-learn_from_play()
-#super_learning_from_db()
+#learn_from_play()
+super_learning_from_db()

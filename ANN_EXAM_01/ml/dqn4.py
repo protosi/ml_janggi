@@ -21,7 +21,7 @@ class ChessMoveAI:
         
     def _build_network(self):
         with tf.variable_scope(self.net_name):
-            self.learn_rate = tf.constant(0.1, dtype=tf.float32)
+            self.learn_rate = tf.constant(0.01, dtype=tf.float32)
             
             '''
             이미지 처리 부분, output은 총 576개 (모양은 다름)

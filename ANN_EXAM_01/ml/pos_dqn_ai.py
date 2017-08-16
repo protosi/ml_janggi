@@ -245,7 +245,7 @@ def learn_from_play(EPISODES = 10000):
     
     
     saver = tf.train.Saver()
-    saver.restore(sess, CURRENT_PATH + "/pos_dqn_play/model.ckpt")
+    saver.restore(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")
     
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
@@ -318,7 +318,7 @@ def learn_from_play(EPISODES = 10000):
                             w = sess.run(copy_ops)
                     w = sess.run(copy_ops)
                     print(w)
-                    saver.save(sess, CURRENT_PATH + "/pos_dqn_play/model.ckpt")  
+                    saver.save(sess, CURRENT_PATH + "/pos_dqn_play2/model.ckpt")  
                 
                     
 
