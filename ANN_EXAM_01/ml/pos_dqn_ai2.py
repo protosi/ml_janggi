@@ -147,21 +147,30 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
                 
         else:
             
-            sum = np.sum(np.sum(next_state[i], axis=0),axis=0)
+            cur_sum = np.sum(np.sum(state[i], axis=0),axis=0)
+            next_sum = np.sum(np.sum(next_state[i], axis=0),axis=0)
+            
+            cur_cho = cur_sum[0]
+            nex_cho = next_sum[0]
+            
+            cur_han = cur_sum[1]
+            nex_han = next_sum[1]
+            
+            max = 29200.0
             
             if turnFlag[i] == 1:
-                reward[i] =  (sum[0] - sum[1]) / (sum[0] + 1)
+                reward[i] =  ((max - nex_han) + (cur_han + nex_han)) / max 
             elif turnFlag[i] == 2:
-                reward[i] =  (sum[1] - sum[0]) / (sum[1] + 1)
+                reward[i] =  ((max - nex_cho) + (cur_cho + nex_cho)) / max
             
             '''            
-            if turnFlag[i] == 1 and sum[0] > sum[1]:
+            if turnFlag[i] == 1 and next_sum[0] > next_sum[1]:
                 reward[i] += 0.2
-            elif turnFlag[i] == 1 and sum[0] < sum[1]:
+            elif turnFlag[i] == 1 and next_sum[0] < next_sum[1]:
                 reward[i] -= 0.2
-            elif turnFlag[i] == 2 and sum[0] < sum[1]:
+            elif turnFlag[i] == 2 and next_sum[0] < next_sum[1]:
                 reward[i] += 0.2
-            elif turnFlag[i] == 2 and sum[0] > sum[1]:
+            elif turnFlag[i] == 2 and next_sum[0] > next_sum[1]:
                 reward[i] -= 0.2
             '''
         
@@ -497,5 +506,5 @@ def learning_from_db(learning_episodes = 100000000):
         print ("####################")       
         
 #learning_from_db()
-#learn_from_play()
-super_learning_from_db()
+learn_from_play()
+#super_learning_from_db()
