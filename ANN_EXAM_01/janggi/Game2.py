@@ -244,14 +244,14 @@ class Game():
                         rt.append([list[i].getX(), list[i].getY(), mvlist[j].getXPos(), mvlist[j].getYPos()])
         return rt;
     
-    def getState(self):
+    def getState(self, move=None):
         
         choMap = self.getUnitMap(1)
         hanMap = self.getUnitMap(2)
         choMap =np.array(choMap).reshape(10, 9, 1)
         hanMap =np.array(hanMap).reshape(10, 9, 1)
         maskMap = np.zeros((10, 9, 1))
-        
+        moveMap = np.zeros((10, 9, 1))
         # 초인 경우
         if(self.turn == 1):
             for i in range(len(choMap)):
@@ -264,7 +264,16 @@ class Game():
                     if hanMap[i][j][0] > 0:
                         maskMap[i][j][0] = 1
         
-        rt = np.concatenate((choMap, hanMap, maskMap), 2)
+        if move != None:
+            pre_x = move[0]
+            pre_y = move[1]
+            new_x = move[2]
+            new_y = move[3]
+            
+            moveMap[pre_y][pre_x] = -1
+            moveMap[new_y][new_x] = 1
+                    
+        rt = np.concatenate((choMap, hanMap, maskMap, moveMap), 2)
         return rt
     
     '''
@@ -342,7 +351,13 @@ class Game():
         map[pre_y][pre_x] = 0
         return map
     
-
+    def getCustomState(self, _map):
+        choMap = self.getCustomUnitMap(1, _map)
+        hanMap = self.getCustomUnitMap(2, _map)
+        choMap =np.array(choMap).reshape(10, 9, 1)
+        hanMap =np.array(hanMap).reshape(10, 9, 1)
+        rt = np.concatenate((choMap, hanMap), 2)
+        return rt
     
     def getCustomUnitMap(self, flag, _map):
         map = copy.deepcopy(_map)
