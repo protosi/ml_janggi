@@ -162,10 +162,10 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
             #    reward[i] =  ((nex_han - cur_han)) / max
             
             if turnFlag[i] == 1:
-                temp[i] =  (max - nex_han) / max 
+                temp[i] =  (cur_han - nex_han) / (cur_han + 1) 
                 #temp[i] =  ((max - nex_han) - (max - nex_cho)) / max
             elif turnFlag[i] == 2:
-                temp[i] =  (max - nex_cho) / max
+                temp[i] =  (cur_cho - nex_cho) / (cur_cho + 1)
                 #temp[i] =  ((max - nex_cho) - (max - nex_han)) / max
             
             '''            
@@ -278,7 +278,7 @@ def learn_from_play(EPISODES = 10000):
     
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
-    saver.restore(sess, CURRENT_PATH + "/pos_dqn_play3/model.ckpt")
+    #saver.restore(sess, CURRENT_PATH + "/pos_dqn_play3/model.ckpt")
     targetDQN = ChessMoveAI(sess, name="target1")
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
@@ -310,7 +310,7 @@ def learn_from_play(EPISODES = 10000):
                     
                     temp_state[pre_y][pre_x][2] = - 1000
                     temp_state[new_y][new_x][2] = 1000
-                                        
+                                         
                     value = mainDQN.predict([temp_state])
                     print(pos, value)
                     if maxvalue < value[0][0]:

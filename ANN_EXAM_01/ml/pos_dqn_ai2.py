@@ -25,7 +25,7 @@ CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 REPLAY_MEMORY = 2000000
 BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
-DISCOUNT_RATE = 0.99
+DISCOUNT_RATE = 0.997
 
 def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
@@ -134,7 +134,7 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
     reward = np.zeros(len(winFlag))
     next_flag = np.zeros(len(winFlag))
     QValue = np.zeros((len(winFlag), 1))
-    
+    temp =  np.zeros(len(winFlag))
     for i in range(len(winFlag)):
     
         if done[i]:
@@ -147,6 +147,17 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
                 
         else:
             
+            if turnFlag[i] == 1:
+                next_flag[i] = 2
+            elif turnFlag[i] == 2:
+                next_flag[i] = 1
+            '''
+            max = 29200.0
+            map, _ = env.getCustomMapByState(next_state[i])
+            score = env.getStageScore(map, turnFlag[i]) - env.getStageScore(map, next_flag[i])
+            temp[i] = -env.doMinMaxForML(map, env.m_depth-1, score, next_flag[i], next_flag[i]) / max
+            '''
+            
             cur_sum = np.sum(np.sum(state[i], axis=0),axis=0)
             next_sum = np.sum(np.sum(next_state[i], axis=0),axis=0)
             
@@ -158,10 +169,17 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
             
             max = 29200.0
             
+            
+            
+            #if turnFlag[i] == 1:
+            #    reward[i] =  ((nex_cho - cur_cho)) / max
+            #elif turnFlag[i] == 2:
+            #    reward[i] =  ((nex_han - cur_han)) / max
+            
             if turnFlag[i] == 1:
-                reward[i] =  ((max - nex_han) + (cur_han + nex_han)) / max 
+                temp[i] =  ((max - nex_han) - (max - nex_cho)) / max 
             elif turnFlag[i] == 2:
-                reward[i] =  ((max - nex_cho) + (cur_cho + nex_cho)) / max
+                temp[i] =  ((max - nex_cho) - (max - nex_han)) / max
             
             '''            
             if turnFlag[i] == 1 and next_sum[0] > next_sum[1]:
@@ -174,10 +192,7 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
                 reward[i] -= 0.2
             '''
         
-        if turnFlag[i] == 1:
-            next_flag[i] = 2
-        elif turnFlag[i] == 2:
-            next_flag[i] = 1
+        
         '''
             이후 인공신경망의 추가적인 학습 규칙은 여기서 reward값을 변경하면 된다.
             가령 공격적인 성향을 갖게끔 하려면, 50 수 이전에 게임이 끝나면 
@@ -193,9 +208,12 @@ def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, ac
             #QValue[i][0] = reward[i] - get_min_qvalue(targetDQN, env, next_state[i], next_flag[i]) - get_max_qvalue(targetDQN, env, next_state[i], next_flag[i])
             QValue[i][0] = reward[i] - (max) * DISCOUNT_RATE
             #QValue[i][0] = reward[i] - (min + max) * DISCOUNT_RATE
+        
+            if (abs(QValue[i][0]) < abs(temp[i])):
+                QValue[i][0] = temp[i]
             
             if i == 0:
-                print("train:", turnFlag[i], action[i], QValue[i][0], min, max)
+                print("train:",action[i], "QValue: ", QValue[i][0],"reward:",  reward[i], "max:",max)
 
         else:
             QValue[i][0] = reward[i]
