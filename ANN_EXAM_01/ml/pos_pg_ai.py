@@ -10,19 +10,35 @@ from _operator import pos
 import numpy as np
 import os
 from time import sleep
+from typing import List
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Operation]:
 
-def learn_from_play(episode = 10000):
+    # Copy variables src_scope to dest_scope
+    op_holder = []
+    src_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES, scope=src_scope_name)
+    dest_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES, scope=dest_scope_name)
+    for src_var, dest_var in zip(src_vars, dest_vars):
+        op_holder.append(dest_var.assign(src_var.value()))
+    return op_holder
+
+def learn_from_play(episode = 1000000):
     sess = tf.Session()
     ai = GameAI(sess, "main")
+    temp = GameAI(sess, "target")
     env = Game()
     saver = tf.train.Saver()
-    saver.restore(sess, CURRENT_PATH + "/pos_pg/model.ckpt")
+    
     sess.run(tf.global_variables_initializer())
+    
+    #saver.restore(sess, CURRENT_PATH + "/pos_pg/model.ckpt")
+    copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
+    print(sess.run(copy_ops))
     MLFlag = 1
     # 에피소드 시작
-    EPISODE_100_REWARD_LIST = []
     for i in range(episode):
         
         env.initGame()
@@ -38,18 +54,30 @@ def learn_from_play(episode = 10000):
             
             if MLFlag == turnFlag:
                 if p < 0.5:
+                    poslist = env.getPossibleMoveList(turnFlag)
+                    maxpos = None
+                    maxvalue = -999 
+                    maxstate = None 
+                    for pos in poslist:
+                        state = env.getState(pos)
+                        action = ai.predict([state])
+                        print(pos, action)
+                        if maxvalue < action:
+                            maxpos = pos
+                            maxvalue = action
+                            maxstate = state
                     pos = env.getMinMaxPos() 
                     maxstate = env.getState(pos)
                     maxvalue = ai.predict([maxstate])
                     reward, done = env.doGame(pos)
-                    print("minmax play! ml thinks the pos", pos ,"is best pos", maxvalue)
+                    print("minmax play! ml thinks the pos", maxpos ,"is best pos", maxvalue)
                     env.printMap()
                 else:
                     poslist = env.getPossibleMoveList(turnFlag)
                 
                     # 현재 ai가 가장 좋다고 생각하는 위치를 구한다.
                     maxpos = None
-                    maxvalue = 0 
+                    maxvalue = -999 
                     maxstate = None   
                     for pos in poslist:
                         state = env.getState(pos)
@@ -67,14 +95,19 @@ def learn_from_play(episode = 10000):
                     _, done = env.doGame(action)
                     #reward = reward * (-1)
                     env.printMap()
-                reward = env.choScore - env.hanScore * 0.1
+                reward = env.choScore# - env.hanScore * 0.1
                 
                 rewards = np.vstack([rewards,reward])
                 states = np.append(states, [maxstate], axis=0)
                 actions = np.vstack([actions, maxvalue])
                 if done:
+                    
                     dr = ai.normalize_discount_reward(rewards)
-                    l, _ = ai.update(states, dr, actions)
+                    print(dr)
+                    for j in range(1):
+                        l, _ = ai.update(states, dr, actions)
+                        print("[Step {} of Episode {}] Reward: {} Loss: {}".format(j, i, reward, l))
+        print(sess.run(copy_ops))
         saver.save(sess, CURRENT_PATH + "/pos_pg/model.ckpt") 
         print("[Episode {}] Reward: {} Loss: {}".format(i, reward, l))
         #sleep(5)
