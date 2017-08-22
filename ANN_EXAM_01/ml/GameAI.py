@@ -42,9 +42,9 @@ class GameAI:
             #net_map = tf.layers.max_pooling2d(net_map, pool_size=[2, 2], strides=1)
             net = tf.reshape(net_map, [-1, 2880])
 
-            net = tf.layers.dense(net, 720, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 360, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
-            net = tf.layers.dense(net, 180, activation=tf.nn.tanh, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 720, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 360, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            net = tf.layers.dense(net, 180, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             outputs = tf.layers.dense(net, self.output_size, activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
             outputs = tf.reshape(outputs, [-1])

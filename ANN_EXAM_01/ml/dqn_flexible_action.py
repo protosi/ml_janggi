@@ -108,7 +108,7 @@ def learn_from_play(EPISODES = 10000):
     for i in range(EPISODES):
         env.initGame()
         done = False
-        ML = 1 
+        ML = i % 2 
         step = 0
         while not done:
             step+=1
@@ -116,8 +116,17 @@ def learn_from_play(EPISODES = 10000):
             
             # 인공지능이 아닌 경우에
             if turn_flag != ML:
+                poslist = env.getPossibleMoveList(turn_flag)
                 pos = env.getMinMaxPos()
-            
+                action = -1
+                statelist = deque()
+                for i in range(len(poslist)):
+                    state = env.getState(poslist[i])
+                    statelist.append(state)
+                    if pos[0] == poslist[i][0] and pos[1] == poslist[i][1] and pos[2] == poslist[i][2] and pos[3] == poslist[i][3]:
+                        action = i
+                state_array =  np.array([x for x in statelist]) 
+                statelist.clear()       
             # 인공지능인 경우에
             else:
                 # 이동 가능한 리스트를 가져온다.
@@ -132,12 +141,13 @@ def learn_from_play(EPISODES = 10000):
                 result = mainDQN.predict(state_array)
                 statelist.clear()
                 
-                pre_score = env.choScore - env.hanScore
-
                 # action을 구한다.
                 action = np.argmax(result)
                 pos = poslist[action]
-                print("ML thinks pos", pos, "is best!" , result)
+                print("ML thinks pos", pos, "is best!" , np.max(result), action)
+                print(result)
+                
+            pre_score = env.choScore# - env.hanScore
             reward, done = env.doGame(pos)
             env.printMap()
             # 게임이 안끝났으면 상대방 말을 처리한다.
@@ -155,9 +165,10 @@ def learn_from_play(EPISODES = 10000):
             next_state_array = np.array([x for x in nextstates])
             nextstates.clear()
             
-            next_score = env.choScore - env.hanScore
+            next_score = env.choScore# - env.hanScore
             
             reward = next_score - pre_score
+            print("reward:", reward, "pre_score:", pre_score, "next_score:", next_score)
             replay_buffer.append({"state": state_array,"reward": reward, 
                                   "next_state": next_state_array,
                                   "action": action, "turn_flag": turn_flag, 
