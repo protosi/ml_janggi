@@ -15,7 +15,7 @@ from time import sleep
 from typing import List
 from Game2 import Game
 from JsonParsorClass2 import JsonParsorClass
-from dqn_2out import ChessMoveAI
+from dqn_2out import GameAI
 import numpy as np
 import tensorflow as tf
 import time
@@ -28,7 +28,7 @@ BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
 DISCOUNT_RATE = 0.99
 
-def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
+def get_min_max_qvalue(targetDQN: GameAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
     poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
     state_list = []
@@ -60,7 +60,7 @@ def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
     return min, max
     
 
-def replay_train(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env, train_batch):
+def replay_train(mainDQN: GameAI, targetDQN: GameAI, env, train_batch):
     # data form
     '''
     {'state': array(...)
@@ -92,7 +92,7 @@ def replay_train(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env, train_batch)
     return loss
     
 
-def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, action, next_state, turnFlag,  done, winFlag):
+def train_dqn(mainDQN: GameAI, targetDQN: GameAI, env: Game, state, action, next_state, turnFlag,  done, winFlag):
     reward = np.zeros(len(winFlag))
     next_flag = np.zeros(len(winFlag))
     QValue = np.zeros((len(winFlag), 1))
@@ -185,13 +185,13 @@ def learn_from_play(EPISODES = 10000):
     
     sess = tf.InteractiveSession()
     
-    mainDQN = ChessMoveAI(sess, name="main1")
+    mainDQN = GameAI(sess, name="main1")
     
     
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
     #saver.restore(sess, CURRENT_PATH + "/pos_dqn_play3/model.ckpt")
-    targetDQN = ChessMoveAI(sess, name="target1")
+    targetDQN = GameAI(sess, name="target1")
     copy_ops = get_copy_var_ops(dest_scope_name="target1", src_scope_name="main1")
     weight = sess.run(copy_ops)
     print(weight)

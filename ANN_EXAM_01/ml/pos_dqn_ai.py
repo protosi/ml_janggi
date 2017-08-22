@@ -15,7 +15,7 @@ from time import sleep
 from typing import List
 from Game import Game
 from JsonParsorClass import JsonParsorClass
-from dqn3 import ChessMoveAI
+from dqn3 import GameAI
 import numpy as np
 import tensorflow as tf
 import time
@@ -27,7 +27,7 @@ BATCH_SIZE = 64
 TARGET_UPDATE_FREQUENCY = 5
 DISCOUNT_RATE = 0.9
 
-def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
+def get_min_max_qvalue(targetDQN: GameAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
     poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
     state_list = []
@@ -49,7 +49,7 @@ def get_min_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
     return min, max
     
 
-def get_min_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
+def get_min_qvalue(targetDQN: GameAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
     poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
     minvalue = 1
@@ -62,7 +62,7 @@ def get_min_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
             minvalue = value[0][0]
     return minvalue
 
-def get_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
+def get_max_qvalue(targetDQN: GameAI, env: Game, next_state, turnFlag):
     map, _ = env.getCustomMapByState(next_state)
     poslist = env.getPossibleMoveListfromCustomMap(map, turnFlag)
     maxvalue = -1
@@ -75,7 +75,7 @@ def get_max_qvalue(targetDQN: ChessMoveAI, env: Game, next_state, turnFlag):
             maxvalue =  value[0][0] 
     return maxvalue
 
-def replay_train(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env, train_batch):
+def replay_train(mainDQN: GameAI, targetDQN: GameAI, env, train_batch):
     # data form
     '''
     {'state': array(...)
@@ -112,7 +112,7 @@ def replay_train(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env, train_batch)
     
     
 
-def train_dqn(mainDQN: ChessMoveAI, targetDQN: ChessMoveAI, env: Game, state, action, next_state, turnFlag,  done, winFlag):
+def train_dqn(mainDQN: GameAI, targetDQN: GameAI, env: Game, state, action, next_state, turnFlag,  done, winFlag):
     reward = np.zeros(len(winFlag))
     next_flag = np.zeros(len(winFlag))
     QValue = np.zeros((len(winFlag), 1))
@@ -240,8 +240,8 @@ def get_copy_var_ops(*, dest_scope_name: str, src_scope_name: str) -> List[tf.Op
 def learn_from_play(EPISODES = 10000):
     
     sess = tf.InteractiveSession()
-    mainDQN = ChessMoveAI(sess, name="main1")
-    targetDQN = ChessMoveAI(sess, name="target1")
+    mainDQN = GameAI(sess, name="main1")
+    targetDQN = GameAI(sess, name="target1")
     
     
     saver = tf.train.Saver()
@@ -323,7 +323,7 @@ def learn_from_play(EPISODES = 10000):
                     
 
 
-def test_play(mainDQN: ChessMoveAI):
+def test_play(mainDQN: GameAI):
     env = Game()
     done = False
     ML = np.random.randint(2) + 1
@@ -366,8 +366,8 @@ def learning_from_db(learning_episodes = 100000000):
     print ("####################")
     
     with tf.Session() as sess:
-        mainDQN = ChessMoveAI(sess, name="main1")
-        targetDQN = ChessMoveAI(sess, name="target1")
+        mainDQN = GameAI(sess, name="main1")
+        targetDQN = GameAI(sess, name="target1")
         
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
