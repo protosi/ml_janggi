@@ -270,8 +270,8 @@ class Game():
             new_x = move[2]
             new_y = move[3]
             
-            moveMap[pre_y][pre_x] = -2000
-            moveMap[new_y][new_x] = 2000
+            moveMap[pre_y][pre_x] = -1000
+            moveMap[new_y][new_x] = 1000
                     
         rt = np.concatenate((choMap, hanMap, maskMap, moveMap), 2)
         return rt
