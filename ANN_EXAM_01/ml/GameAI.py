@@ -21,7 +21,7 @@ class GameAI:
         
     def _build_network(self):
         with tf.variable_scope(self.net_name):
-            self.learn_rate = tf.constant(0.1, dtype=tf.float32)
+            self.learn_rate = tf.constant(0.01, dtype=tf.float32)
             
             '''
             이미지 처리 부분, output은 총 576개 (모양은 다름)
@@ -47,13 +47,13 @@ class GameAI:
             net = tf.layers.dense(net, 180, activation=tf.nn.relu, kernel_initializer=tf.contrib.layers.xavier_initializer())
             outputs = tf.layers.dense(net, self.output_size, activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
             
-            outputs = tf.reshape(outputs, [-1])
-            outputs = tf.nn.softmax(outputs, name="output_y")
+            outputs = tf.reshape(outputs, [-1], name="output_y")
+            #outputs = tf.nn.softmax(outputs, name="output_y")
             
             self._Qpred = outputs
             
-            self._loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self._Qpred, labels=self._Y))
-            
+            #self._loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self._Qpred, labels=self._Y))
+            self._loss = tf.losses.mean_squared_error(self._Qpred, self._Y)
             optimizer = tf.train.AdadeltaOptimizer(learning_rate=self.learn_rate)
             self._train = optimizer.minimize(self._loss)
             

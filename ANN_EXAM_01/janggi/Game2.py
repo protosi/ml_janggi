@@ -68,6 +68,7 @@ class Game():
         self.addObjToMap(0, 0, UnitCha(1, self));
         self.addObjToMap(8, 0, UnitCha(1, self));
         
+        
             #MA
         self.addObjToMap(1, 0, UnitMa(1, self));
         self.addObjToMap(7, 0, UnitMa(1, self));
@@ -208,7 +209,7 @@ class Game():
         enTurn = self.getTurn()
         reward = self.getStageScoreForML(self.getMap(), myTurn) - self.getStageScoreForML(self.getMap(), enTurn)
         
-        if(self.turnCount >= 1000):
+        if(self.turnCount >= 500):
             done = True
         
         return reward, done
@@ -281,6 +282,7 @@ class Game():
     '''
     def getCustomMapByState(self, state):
         
+        pos = [-1, -1, -1, -1]
         turn = -1
         map = self.getEmptyMap()
 
@@ -341,9 +343,16 @@ class Game():
                     map = self.addObjToCustomMap(x, y, UnitGung(1, self), map);
                 
                 if state[y][x][1] == UnitGung.staticScore:
-                    map = self.addObjToCustomMap(x, y, UnitGung(2, self), map);    
+                    map = self.addObjToCustomMap(x, y, UnitGung(2, self), map);
+                    
+                if state[y][x][3] < 0:
+                    pos[0] = x
+                    pos[1] = y
+                if state[y][x][3] > 0:
+                    pos[2] = x
+                    pos[3] = y
         
-        return map, turn
+        return map, turn, pos
     
     def getCustomMoveMap(self, _map, pre_x, pre_y, new_x, new_y):
         map = copy.deepcopy(_map)
@@ -716,6 +725,27 @@ class Game():
         print("elapsed_time : " + str(elapsed_time))
         self.setMove(res_state[0], res_state[1], res_state[2], res_state[3])
     
+    def getCustomMapScore(self, map, flag):
+        
+        choscore = 0
+        hanscore = 0
+        
+        score = 0 
+        for row in range(0, len(map)):
+            for col in range(0, len(map[row])):
+                if map[row][col] != 0:
+                    if map[row][col].getFlag() == 1 :
+                        choscore += map[row][col].getScore()  
+                    elif map[row][col].getFlag() == 2 :
+                        hanscore += map[row][col].getScore()
+                        
+        if flag == 1:
+            score = choscore - hanscore
+        elif flag == 2:
+            score = hanscore - choscore
+        return score
+                        
+
     def getStageScoreForML(self, stage, flag):
         
         score = 0 

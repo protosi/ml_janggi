@@ -19,15 +19,61 @@ import numpy as np
 import tensorflow as tf
 import time
 import copy
+from math import sqrt
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 REPLAY_MEMORY = 50000
-BATCH_SIZE = 64
+BATCH_SIZE = 512
 TARGET_UPDATE_FREQUENCY = 5
-DISCOUNT_RATE = 0.99
+DISCOUNT_RATE = 0.9
+MINIMAX_DEPTH = 1
+
+def minimaxseq(env:Game, states, flag, depth):
+    
+    score = []
+    
+    for state in states:
+        map, turn, pos = env.getCustomMapByState(state)
+        #print(pos)
+        score.append(minimax(env, map, pos, flag, depth))
+    return score
+
+def minimax(env: Game ,map, action, flag, depth):
+    score = 0
+    next_map = env.getCustomMoveMap(map, action[0], action[1], action[2], action[3])
+    if depth == 0:
+        return env.getCustomMapScore(next_map, flag)
+    emflag = 0
+    if flag == 1: 
+        emflag = 2
+    elif flag == 2:
+        emflag = 1 
+    maxscore = -99999
+    maxaction = None
+    em_actions = env.getPossibleMoveListfromCustomMap(next_map, emflag)
+    for em_action in em_actions:
+        em_score = minimax(env, next_map, em_action, emflag, depth-1)
+        
+        if maxscore < em_score:
+            maxscore = em_score
+            maxaction = em_action
+    score = (-1) * maxscore
+    return score 
+
+    
+def replay_train_with_minimax(mainDQN: GameAI, targetDQN: GameAI, env:Game, train_batch):
+    states = np.array([x['state'] for x in train_batch])
+    
+    for state in states:
+        scores = minimaxseq(env, state, 1, MINIMAX_DEPTH)
+        print(np.max(scores), np.min(scores))
+        mainDQN.update(state, scores)
+    
+
+  
 
 
-def replay_train(mainDQN: GameAI, targetDQN: GameAI, env, train_batch):
+def replay_train(mainDQN: GameAI, targetDQN: GameAI, env:Game, train_batch):
     # data form
     '''
         {
@@ -108,7 +154,7 @@ def learn_from_play(EPISODES = 10000):
     for i in range(EPISODES):
         env.initGame()
         done = False
-        ML = 1#i % 2 
+        ML = (1+i) % 2 
         step = 0
         while not done:
             step+=1
@@ -166,18 +212,21 @@ def learn_from_play(EPISODES = 10000):
             nextstates.clear()
             
             next_score = env.choScore# - env.hanScore
-            
-            reward = (next_score - pre_score)/1000 + 0.5 * (env.choScore - env.hanScore)/9200.0
+            if done:
+                reward = (env.choScore) / sqrt(env.turnCount + 1) - sqrt(env.turnCount) - env.hanScore/1000.0
+            else:
+                reward =(next_score - pre_score) / sqrt(env.turnCount + 1)
+            #reward = (next_score - pre_score)/1000 + 0.5 * (env.choScore - env.hanScore)/9200.0
             print("reward:", reward, "pre_score:", pre_score, "next_score:", next_score)
             replay_buffer.append({"state": state_array,"reward": reward, 
                                   "next_state": next_state_array,
                                   "action": action, "turn_flag": turn_flag, 
                                   "done": done})
             
-            if len(replay_buffer) > BATCH_SIZE:
-                minibatch = random.sample(replay_buffer, BATCH_SIZE)
-                loss = replay_train(mainDQN, targetDQN, env, minibatch)
-            if step % TARGET_UPDATE_FREQUENCY == 0:
-                w = sess.run(copy_ops)
+        if len(replay_buffer) > BATCH_SIZE:
+            minibatch = random.sample(replay_buffer, BATCH_SIZE)
+            loss = replay_train_with_minimax(mainDQN, targetDQN, env, minibatch)
+        if EPISODES % TARGET_UPDATE_FREQUENCY == 0:
+            w = sess.run(copy_ops)
         saver.save(sess, CURRENT_PATH + "/pos_flexible_action/model.ckpt")
 learn_from_play()
