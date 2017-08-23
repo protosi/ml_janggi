@@ -108,7 +108,7 @@ def learn_from_play(EPISODES = 10000):
     for i in range(EPISODES):
         env.initGame()
         done = False
-        ML = i % 2 
+        ML = 1#i % 2 
         step = 0
         while not done:
             step+=1
@@ -167,7 +167,7 @@ def learn_from_play(EPISODES = 10000):
             
             next_score = env.choScore# - env.hanScore
             
-            reward = next_score - pre_score
+            reward = (next_score - pre_score)/1000 + 0.5 * (env.choScore - env.hanScore)/9200.0
             print("reward:", reward, "pre_score:", pre_score, "next_score:", next_score)
             replay_buffer.append({"state": state_array,"reward": reward, 
                                   "next_state": next_state_array,
